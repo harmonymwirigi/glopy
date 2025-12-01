@@ -115,55 +115,118 @@ class VehicleDeduplicator:
             logger.error(f"Error getting sample vehicles: {e}")
             return []
     
+    def _is_candidate_match(self, new_vehicle: Dict, existing_vehicle: Dict) -> bool:
+        """
+        Pre-filter vehicles using strict rules BEFORE comparing vectors.
+
+        This prevents false positives like matching Audi with Volkswagen.
+
+        Args:
+            new_vehicle: New vehicle data
+            existing_vehicle: Existing vehicle data
+
+        Returns:
+            True if vehicles should be compared, False otherwise
+        """
+        new_make = (new_vehicle.get('make') or '').strip().lower()
+        exist_make = (existing_vehicle.get('make') or '').strip().lower()
+
+        new_year = new_vehicle.get('year')
+        exist_year = existing_vehicle.get('year')
+
+        # RULE 1: Same make (exact match) is required
+        # Don't compare Audi vs Volkswagen, BMW vs Mercedes, etc.
+        if new_make and exist_make and new_make != exist_make:
+            return False
+
+        # RULE 2: Year must be within ±3 years
+        # Don't compare 2012 vs 2020, 2010 vs 2018, etc.
+        if new_year and exist_year:
+            year_diff = abs(int(new_year) - int(exist_year))
+            if year_diff > 3:
+                return False
+
+        # RULE 3: Price must be within ±50% (prevents luxury vs economy matches)
+        new_price = new_vehicle.get('price')
+        exist_price = existing_vehicle.get('price')
+        if new_price and exist_price:
+            new_price = float(new_price)
+            exist_price = float(exist_price)
+            price_ratio = max(new_price, exist_price) / min(new_price, exist_price)
+            if price_ratio > 2.0:  # More than 2x price difference
+                return False
+
+        return True
+
     def check_for_duplicates(self, vehicle_data: Dict) -> Tuple[bool, List[Dict]]:
         """
         Check if a vehicle is a duplicate of existing vehicles.
-        
+
+        NOW WITH SMART PRE-FILTERING to prevent false positives!
+
         Args:
             vehicle_data: Dictionary containing vehicle information
-            
+
         Returns:
             Tuple of (is_duplicate, list_of_similar_vehicles)
         """
         try:
             # Initialize vectorizer if needed
             self._initialize_vectorizer()
-            
+
             # Get all existing vehicles for comparison
             existing_vehicles = self._get_all_vehicles()
             if not existing_vehicles:
                 return False, []
-            
+
+            # PRE-FILTER: Only compare with candidates (same make, similar year, similar price)
+            candidates = []
+            for existing in existing_vehicles:
+                if self._is_candidate_match(vehicle_data, existing):
+                    candidates.append(existing)
+
+            logger.info(f"Pre-filtering: {len(existing_vehicles)} total vehicles -> {len(candidates)} candidates")
+
+            if not candidates:
+                logger.info("No candidates match pre-filter criteria (different make/year/price)")
+                return False, []
+
             # Vectorize the new vehicle
             new_vector = self.vectorizer.transform_single(vehicle_data)
             if new_vector is None:
                 logger.warning("Could not vectorize new vehicle data")
                 return False, []
-            
-            # Find similar vehicles
+
+            # Find similar vehicles (only among candidates)
             similar_vehicles = []
-            
-            for existing_vehicle in existing_vehicles:
+
+            for existing_vehicle in candidates:
                 # Get existing vehicle vector
                 existing_vector = self._get_vehicle_vector(existing_vehicle['id'])
                 if existing_vector is None:
                     continue
-                
+
                 # Calculate similarity
                 similarity = self.vectorizer.calculate_similarity(new_vector, existing_vector)
-                
+
+                logger.info(f"Comparing with {existing_vehicle['make']} {existing_vehicle['model']} {existing_vehicle['year']}: {similarity:.2%}")
+
                 if similarity >= self.similarity_threshold:
                     similar_vehicles.append({
                         'vehicle': existing_vehicle,
                         'similarity_score': similarity
                     })
-            
+
             # Sort by similarity score (highest first)
             similar_vehicles.sort(key=lambda x: x['similarity_score'], reverse=True)
-            
+
             is_duplicate = len(similar_vehicles) > 0
+
+            if is_duplicate:
+                logger.warning(f"Found {len(similar_vehicles)} potential duplicates")
+
             return is_duplicate, similar_vehicles
-            
+
         except Exception as e:
             logger.error(f"Error checking for vehicle duplicates: {e}")
             return False, []
