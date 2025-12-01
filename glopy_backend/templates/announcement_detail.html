@@ -1,0 +1,753 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/announcement_detail.css') }}">
+  <style>
+    /* Additional Glopy Theme Styles */
+    .property-header {
+      background: linear-gradient(135deg, #0071c2, #00a5e5);
+    }
+    
+    .property-header * {
+      color: white !important;
+    }
+    
+    .back-button {
+      color: white !important;
+    }
+    
+    .back-button:hover {
+      color: white !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="property-detail-page">
+    
+    <!-- Simple Header with Back and Save -->
+    <header class="property-header">
+        <div class="header-container">
+            <button class="back-button" onclick="goBack()">
+                <i class="bi bi-chevron-left"></i>
+                <span>Volver a resultados</span>
+            </button>
+            <div class="header-actions">
+                {% if session.user_id and session.user_id != anuncio.user_id %}
+                <button class="action-btn save-btn" id="saveBtn" onclick="toggleSave()">
+                    <i class="bi bi-heart"></i>
+                    <span>Guardar</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Sliding Image Gallery -->
+    <div class="property-gallery">
+        {% if anuncio.images and anuncio.images|length > 0 %}
+            <div class="gallery-container">
+                <div class="sliding-gallery">
+                    <div class="gallery-track">
+                        {% for img in anuncio.images %}
+                        <div class="gallery-slide {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+                            <img src="{% if img.image_url.startswith('http') %}{{ img.image_url }}{% else %}{{ url_for('static', filename=img.image_url) }}{% endif %}" 
+                                 alt="{{ anuncio.title }} - Imagen {{ loop.index }}"
+                                 onerror="this.src='{{ url_for('static', filename='LOGOS/Logo_Glopy.png') }}'">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    {% if anuncio.images|length > 1 %}
+                    <button class="gallery-nav prev" onclick="prevSlide()">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="gallery-nav next" onclick="nextSlide()">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                    
+                    <!-- Image Counter -->
+                    <div class="image-counter">
+                        <span id="currentSlide">1</span> / {{ anuncio.images|length }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Thumbnail Navigation -->
+                {% if anuncio.images|length > 1 %}
+                <div class="thumbnail-nav">
+                    {% for img in anuncio.images %}
+                    <button class="thumbnail-dot {% if loop.first %}active{% endif %}" 
+                            onclick="goToSlide({{ loop.index0 }})"
+                            aria-label="Ir a imagen {{ loop.index }}"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="no-photos">
+                <i class="bi bi-camera"></i>
+                <p>No hay fotos disponibles</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-content">
+        <div class="content-container">
+            
+            <!-- Left Column: Property Details -->
+            <div class="property-details">
+                
+                <!-- Property Header -->
+                <div class="property-info-header">
+                    <div class="title-section">
+                        <h1 class="property-title">{{ anuncio.title or 'Propiedad sin título' }}</h1>
+                        <div class="property-location">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>{{ anuncio.location.name if anuncio.location else 'Ubicación no especificada' }}</span>
+                        </div>
+                        <div class="property-rating">
+                            <div class="rating-stars">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                                <span class="rating-text">4.5 · Excelente ubicación</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Features Bar -->
+                <div class="key-features">
+                    {% if anuncio.rooms %}
+                    <div class="feature-item">
+                        <i class="bi bi-door-open-fill"></i>
+                        <span>{{ anuncio.rooms }} habitaciones</span>
+                    </div>
+                    {% endif %}
+                    {% if anuncio.bathrooms %}
+                    <div class="feature-item">
+                        <i class="bi bi-droplet-fill"></i>
+                        <span>{{ anuncio.bathrooms }} baños</span>
+                    </div>
+                    {% endif %}
+                    {% if anuncio.square_meters %}
+                    <div class="feature-item">
+                        <i class="bi bi-rulers"></i>
+                        <span>{{ "%.0f"|format(anuncio.square_meters|float) }} m²</span>
+                    </div>
+                    {% endif %}
+                    {% if anuncio.has_parking %}
+                    <div class="feature-item">
+                        <i class="bi bi-car-front-fill"></i>
+                        <span>Parking incluido</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="description-section">
+                    <h2>Acerca de esta propiedad</h2>
+                    <div class="description-content">
+                        {% set clean_description = anuncio.description %}
+                        {% if clean_description %}
+                            {% if 'Contact:' in clean_description or 'WhatsApp:' in clean_description %}
+                                {% set description_parts = clean_description.split('Contact:')[0].split('WhatsApp:')[0] %}
+                                <p>{{ description_parts.strip() or 'Esta propiedad cuenta con excelentes características y se encuentra en una ubicación privilegiada.' }}</p>
+                            {% else %}
+                                <p>{{ clean_description }}</p>
+                            {% endif %}
+                        {% else %}
+                            <p>Esta propiedad cuenta con excelentes características y se encuentra en una ubicación privilegiada.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Amenities -->
+                {% if anuncio.features %}
+                <div class="amenities-section">
+                    <h2>Lo que ofrece esta propiedad</h2>
+                    <div class="amenities-grid">
+                        {% for feature in anuncio.features.split(',')[:6] %}
+                        <div class="amenity-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>{{ feature.strip() }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if anuncio.features.split(',')|length > 6 %}
+                        <button class="show-more-amenities">
+                            Ver todos los servicios
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Right Column: Booking Card -->
+            <div class="booking-sidebar">
+                <div class="booking-card">
+                    <div class="price-section">
+                        <div class="price-display">
+                            <span class="price">{{ '{:,.0f}'.format(anuncio.price|float).replace(',', '.') }}€</span>
+                            {% if anuncio.square_meters and anuncio.square_meters|float > 0 %}
+                            <span class="price-per-unit">{{ '{:,.0f}'.format((anuncio.price|float / anuncio.square_meters|float)).replace(',', '.') }}€/m²</span>
+                            {% endif %}
+                        </div>
+                        <div class="price-rating">
+                            <i class="bi bi-star-fill"></i>
+                            <span>4.5 · 23 reseñas</span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="contact-form">
+                        <h3>¿Interesado en esta propiedad?</h3>
+                        <div class="contact-options">
+                            <button class="contact-btn primary" onclick="contactWhatsApp()">
+                                <i class="bi bi-whatsapp"></i>
+                                <span>Contactar por WhatsApp</span>
+                            </button>
+                            <button class="contact-btn secondary" onclick="contactEmail()">
+                                <i class="bi bi-envelope-fill"></i>
+                                <span>Enviar mensaje</span>
+                            </button>
+                            <button class="contact-btn tertiary" onclick="requestCall()">
+                                <i class="bi bi-telephone-fill"></i>
+                                <span>Solicitar llamada</span>
+                            </button>
+                        </div>
+                        
+                        <div class="contact-info">
+                            <p class="contact-note">
+                                <i class="bi bi-shield-check"></i>
+                                Tu información está protegida y solo se compartirá con el propietario
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action -->
+                    {% if session.user_id and session.user_id != anuncio.user_id %}
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="toggleSave()">
+                            <i class="bi bi-heart"></i>
+                            <span>Guardar</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de navegación inferior -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Global variables
+const announcementId = {{ anuncio.id }};
+const propertyImages = [
+    {% for img in anuncio.images %}
+    "{% if img.image_url.startswith('http') %}{{ img.image_url }}{% else %}{{ url_for('static', filename=img.image_url) }}{% endif %}",
+    {% endfor %}
+];
+
+// Initialize save button functionality
+function initializeSaveButton() {
+    const saveBtn = document.getElementById('saveBtn');
+    // Only proceed if save button exists (not user's own announcement)
+    if (!saveBtn) {
+        console.log('Save button not found - user might own this announcement');
+        return;
+    }
+
+    // Check if button has required elements
+    const icon = saveBtn.querySelector('i');
+    const textSpan = saveBtn.querySelector('span');
+    if (!icon || !textSpan) {
+        console.error('Save button missing required elements');
+        return;
+    }
+
+    // Initialize button state
+    checkSaveStatus();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize save functionality
+    initializeSaveButton();
+    
+    // Initialize gallery
+    initGallery();
+    
+    // Add keyboard navigation for gallery
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            prevSlide();
+        } else if (e.key === 'ArrowRight') {
+            nextSlide();
+        }
+    });
+});
+
+// Gallery functions
+let currentSlideIndex = 0;
+const slides = document.querySelectorAll('.gallery-slide');
+const dots = document.querySelectorAll('.thumbnail-dot');
+
+function initGallery() {
+    if (slides.length === 0) return;
+    updateSlide();
+}
+
+function nextSlide() {
+    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+    updateSlide();
+}
+
+function prevSlide() {
+    currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
+    updateSlide();
+}
+
+function goToSlide(index) {
+    if (index >= 0 && index < slides.length) {
+        currentSlideIndex = index;
+        updateSlide();
+    }
+}
+
+function updateSlide() {
+    // Update slides
+    slides.forEach(slide => slide.classList.remove('active'));
+    slides[currentSlideIndex].classList.add('active');
+    
+    // Update dots
+    dots.forEach(dot => dot.classList.remove('active'));
+    dots[currentSlideIndex].classList.add('active');
+    
+    // Update counter
+    const counter = document.getElementById('currentSlide');
+    if (counter) {
+        counter.textContent = currentSlideIndex + 1;
+    }
+}
+
+// Save/unsave functionality with better feedback
+async function toggleSave() {
+    // Get button and check existence
+    const saveBtn = document.getElementById('saveBtn');
+    if (!saveBtn) {
+        console.error('Save button not found');
+        return;
+    }
+
+    // Get button elements and check existence
+    const icon = saveBtn.querySelector('i');
+    const textSpan = saveBtn.querySelector('span');
+    if (!icon || !textSpan) {
+        console.error('Save button missing required elements');
+        return;
+    }
+    
+    // Disable button during request
+    saveBtn.disabled = true;
+    
+    try {
+        // Determine which endpoint to use based on current state
+        const isSaved = saveBtn.classList.contains('saved');
+        const endpoint = isSaved ? '/api/unsave-ad' : '/api/save-ad';
+        
+        // Make the request
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                announcement_id: announcementId
+            })
+        });
+        
+        // Handle unauthorized
+        if (response.status === 401) {
+            window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        
+        // Handle other errors
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', errorText);
+            throw new Error(isSaved ? 
+                'Error al eliminar de favoritos' : 
+                'Error al guardar en favoritos');
+        }
+        
+        // Parse response
+        const data = await response.json();
+        
+        // Update UI based on response
+        if (data.success) {
+            if (isSaved) {
+                // Unsaving
+                setButtonState(saveBtn, false);
+                showNotification('Eliminado de favoritos', 'info');
+            } else {
+                // Saving
+                setButtonState(saveBtn, true);
+                showNotification('¡Propiedad guardada en favoritos!', 'success');
+            }
+        } else {
+            showNotification(data.message || 'Error al procesar la solicitud', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling save:', error);
+        showNotification(error.message, 'error');
+        
+        // Reset button to original state on error
+        setButtonState(saveBtn, saveBtn.classList.contains('saved'));
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+        }
+    }
+}
+
+// Check save status on load
+async function checkSaveStatus() {
+    const saveBtn = document.getElementById('saveBtn');
+    // Don't proceed if button doesn't exist (user's own announcement)
+    if (!saveBtn) return;
+    
+    try {
+        // Make request to check saved status
+        const response = await fetch('/api/check-saved-ads', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                announcement_ids: [announcementId]
+            })
+        });
+        
+        // Handle unauthorized silently
+        if (response.status === 401) {
+            setButtonState(saveBtn, false);
+            return;
+        }
+        
+        // Handle other errors
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', errorText);
+            throw new Error('Error al verificar estado');
+        }
+        
+        // Parse response
+        const data = await response.json();
+        
+        // Update button state based on response
+        if (data.success && Array.isArray(data.saved_ads)) {
+            setButtonState(saveBtn, data.saved_ads.includes(announcementId));
+        } else {
+            setButtonState(saveBtn, false);
+        }
+    } catch (error) {
+        console.error('Error checking save status:', error);
+        if (saveBtn) {
+            setButtonState(saveBtn, false);
+        }
+    }
+}
+
+// Helper function to set button state
+function setButtonState(button, isSaved) {
+    // Don't proceed if button doesn't exist
+    if (!button) return;
+    
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span');
+    
+    // Don't proceed if button elements are missing
+    if (!icon || !textSpan) return;
+    
+    // Reset classes
+    icon.classList.remove('bi-heart-fill', 'bi-heart');
+    button.classList.remove('saved');
+    
+    if (isSaved) {
+        icon.classList.add('bi-heart-fill');
+        textSpan.textContent = 'Guardado';
+        button.classList.add('saved');
+    } else {
+        icon.classList.add('bi-heart');
+        textSpan.textContent = 'Guardar';
+    }
+    
+    button.disabled = false;
+}
+
+// Back button with history fallback
+function goBack() {
+    const referrer = document.referrer;
+    if (referrer && referrer.includes(window.location.host)) {
+        history.back();
+    } else {
+        // If no valid referrer, go to search results
+        window.location.href = "{{ url_for('inmobiliaria') }}";
+    }
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Remove notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Navigation functions
+function goBack() {
+    if (document.referrer) {
+        history.back();
+    } else {
+        window.location.href = "{{ url_for('inmobiliaria') }}";
+    }
+}
+
+// Image gallery functions
+function changeImage(direction) {
+    if (propertyImages.length === 0) return;
+    
+    currentImageIndex += direction;
+    
+    if (currentImageIndex >= propertyImages.length) {
+        currentImageIndex = 0;
+    } else if (currentImageIndex < 0) {
+        currentImageIndex = propertyImages.length - 1;
+    }
+    
+    updateMainImage();
+}
+
+function selectImage(index) {
+    if (index >= 0 && index < propertyImages.length) {
+        currentImageIndex = index;
+        updateMainImage();
+        updateThumbnails();
+    }
+}
+
+function updateMainImage() {
+    const mainImage = document.getElementById('mainImage');
+    const imageCounter = document.getElementById('currentImageIndex');
+    
+    if (mainImage && propertyImages[currentImageIndex]) {
+        mainImage.src = propertyImages[currentImageIndex];
+    }
+    
+    if (imageCounter) {
+        imageCounter.textContent = currentImageIndex + 1;
+    }
+}
+
+function updateThumbnails() {
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    thumbnails.forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === currentImageIndex);
+    });
+}
+
+function openPhotoModal() {
+    // Create and show a modal with all photos
+    showNotification('Galería completa próximamente', 'info');
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize save button state
+    checkSaveStatus();
+    
+    // Initialize image gallery
+    if (propertyImages.length > 0) {
+        updateMainImage();
+        updateThumbnails();
+    }
+    
+    // Add keyboard navigation for images
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            changeImage(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeImage(1);
+        }
+    });
+});
+
+// Save/unsave functionality
+async function toggleSave() {
+    const saveBtn = document.getElementById('saveBtn');
+    const icon = saveBtn.querySelector('i');
+    
+    try {
+        const response = await fetch('/api/toggle-save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                announcement_id: announcementId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            if (result.saved) {
+                icon.className = 'bi bi-heart-fill';
+                saveBtn.classList.add('saved');
+                showNotification('Propiedad guardada', 'success');
+            } else {
+                icon.className = 'bi bi-heart';
+                saveBtn.classList.remove('saved');
+                showNotification('Propiedad eliminada de guardados', 'info');
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling save:', error);
+        showNotification('Error al guardar la propiedad', 'error');
+    }
+}
+
+async function checkSaveStatus() {
+    const saveBtn = document.getElementById('saveBtn');
+    const icon = saveBtn.querySelector('i');
+    
+    try {
+        const response = await fetch(`/api/check-save-status/${announcementId}`);
+        const result = await response.json();
+        
+        if (result.saved) {
+            icon.className = 'bi bi-heart-fill';
+            saveBtn.classList.add('saved');
+        }
+    } catch (error) {
+        console.error('Error checking save status:', error);
+    }
+}
+
+// Contact functions
+function contactWhatsApp() {
+    if (contactPhone) {
+        const message = encodeURIComponent(`Hola! Me interesa la propiedad "${propertyTitle}" que vi en Glopy. ¿Podrías darme más información?`);
+        const phoneNumber = contactPhone.replace(/\D/g, ''); // Remove non-digits
+        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    } else {
+        showNotification('No hay número de teléfono disponible', 'warning');
+    }
+}
+
+function contactEmail() {
+    if (contactEmail) {
+        const subject = encodeURIComponent(`Consulta sobre: ${propertyTitle}`);
+        const body = encodeURIComponent(`Hola,\n\nMe interesa la propiedad "${propertyTitle}" que vi en Glopy.\n\n¿Podrías darme más información?\n\nGracias`);
+        window.open(`mailto:${contactEmail}?subject=${subject}&body=${body}`, '_blank');
+    } else {
+        showNotification('No hay email de contacto disponible', 'warning');
+    }
+}
+
+// Share functionality
+function shareProperty() {
+    if (navigator.share) {
+        navigator.share({
+            title: propertyTitle,
+            text: `Mira esta propiedad en Glopy: ${propertyTitle}`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback to copying URL
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showNotification('Enlace copiado al portapapeles', 'success');
+        });
+    }
+}
+
+// Contact and action functions
+function requestCall() {
+    // This could open a modal for call request
+    showNotification('Solicitud de llamada enviada', 'success');
+}
+
+function reportProperty() {
+    if (confirm('¿Deseas reportar esta propiedad?')) {
+        showNotification('Reporte enviado. Gracias por tu feedback.', 'success');
+    }
+}
+
+// Price alert functionality
+function togglePriceAlert() {
+    // This would integrate with your price alert system
+    showNotification('Alerta de precio configurada', 'success');
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Hide notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Add click handlers
+document.addEventListener('DOMContentLoaded', function() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', toggleSave);
+    }
+});
+</script>
+
+{% endblock %}
+

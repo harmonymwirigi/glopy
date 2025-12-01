@@ -1,0 +1,1274 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+  <style>
+    .profile-header {
+      background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2rem;
+      overflow: hidden;
+    }
+    
+    .company-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    
+    .profile-tabs {
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+      padding: 0 1rem;
+    }
+    
+    .profile-tab {
+      padding: 1rem 1.5rem;
+      border: none;
+      background: none;
+      color: #6c757d;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .profile-tab.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+    }
+    
+    .profile-tab:hover {
+      color: #007bff;
+    }
+    
+    .profile-content {
+      padding: 2rem 1rem;
+      background: #f8f9fa;
+      min-height: 400px;
+    }
+    
+    .saved-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    
+    .saved-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .saved-ad-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    
+    .saved-search-criteria {
+      background: #f8f9fa;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .btn-unsave {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-unsave:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    .btn-run-search {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-run-search:hover {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+    
+    /* Quick Actions Styles */
+    .profile-quick-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .quick-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-width: 80px;
+      cursor: pointer;
+    }
+    
+    .quick-action-btn i {
+      font-size: 1.5rem;
+    }
+    
+    .quick-action-btn.primary {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    .quick-action-btn.primary:hover {
+      background: linear-gradient(135deg, #218838, #1ea47a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+      color: white;
+    }
+    
+    .quick-action-btn.secondary {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    
+    .quick-action-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    .quick-action-btn.tertiary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .quick-action-btn.tertiary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      color: white;
+    }
+    
+    /* Glopy Points Styles */
+    .glopy-points-display {
+      margin: 1rem 0;
+    }
+    
+    .points-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    .points-badge i {
+      color: #ffd700;
+      font-size: 1.2rem;
+    }
+    
+    .points-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .points-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.9rem;
+    }
+    
+    /* Points History Styles */
+    .points-history {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .points-transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #eee;
+      background: white;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .points-transaction:last-child {
+      border-bottom: none;
+    }
+    
+    .transaction-info {
+      flex: 1;
+    }
+    
+    .transaction-description {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .transaction-date {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .transaction-points {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .transaction-points.positive {
+      color: #28a745;
+    }
+    
+    .transaction-points.negative {
+      color: #dc3545;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<!-- Enhanced Profile Header -->
+<div class="profile-header">
+  <div class="profile-avatar">
+    {% if user.is_company and user.company_logo %}
+      <img src="{{ url_for('static', filename=user.company_logo) }}" alt="Company Logo" class="company-logo">
+    {% else %}
+      <i class="bi bi-person-fill"></i>
+    {% endif %}
+  </div>
+  <h2>
+    {{ user.name or 'Usuario' }}
+    {% if user.is_verified %}
+      <i class="bi bi-patch-check-fill text-warning ms-2 verified-badge" title="Usuario verificado"></i>
+    {% endif %}
+    {% if user.is_company %}
+      <i class="bi bi-building text-info ms-2" title="Empresa"></i>
+    {% endif %}
+  </h2>
+  <p class="mb-3">{{ user.email }}</p>
+  {% if user.is_company and user.cif %}
+    <p class="mb-3">
+      <strong>CIF:</strong> {{ user.cif }}
+      <i class="bi bi-shield-check text-success ms-1" title="CIF verificado"></i>
+    </p>
+  {% endif %}
+  
+  {% if user.is_company %}
+    <div class="mb-3">
+      <button class="btn btn-outline-light btn-sm" onclick="showLogoUpload()">
+        <i class="bi bi-camera"></i> 
+        {% if user.company_logo %}Cambiar Logo{% else %}Subir Logo{% endif %}
+      </button>
+    </div>
+  {% endif %}
+  
+  <!-- Glopy Points Display -->
+  <div class="glopy-points-display">
+    <div class="points-badge">
+      <i class="bi bi-star-fill"></i>
+      <span class="points-number" id="userPoints">{{ user.glopy_points or 0 }}</span>
+      <span class="points-label">Puntos Glopy</span>
+    </div>
+  </div>
+  
+       <!-- Quick Actions -->
+       <div class="profile-quick-actions">
+         <a href="{{ url_for('create_ad') }}" class="quick-action-btn primary">
+           <i class="bi bi-plus-circle"></i>
+           <span>Crear Anuncio</span>
+         </a>
+         <a href="{{ url_for('my_ads') }}" class="quick-action-btn secondary">
+           <i class="bi bi-house-door"></i>
+           <span>Mis Anuncios</span>
+         </a>
+         <a href="{{ url_for('inmobiliaria') }}" class="quick-action-btn tertiary">
+           <i class="bi bi-search"></i>
+           <span>Buscar</span>
+         </a>
+         <button class="quick-action-btn quaternary" onclick="showTab('email-settings')">
+           <i class="bi bi-bell"></i>
+           <span>Alertas</span>
+         </button>
+       </div>
+</div>
+
+<!-- Profile Tabs -->
+<div class="profile-tabs">
+  <div class="d-flex">
+    <button class="profile-tab active" onclick="showTab('saved-ads')">
+      <i class="bi bi-heart-fill"></i> Anuncios Guardados ({{ saved_ads|length }})
+    </button>
+    <button class="profile-tab" onclick="showTab('saved-searches')">
+      <i class="bi bi-bookmark-fill"></i> Búsquedas Guardadas ({{ saved_searches|length }})
+    </button>
+    <button class="profile-tab" onclick="showTab('invitations')">
+      <i class="bi bi-gift-fill"></i> Invitar Amigos
+    </button>
+    <button class="profile-tab" onclick="showTab('email-settings')">
+      <i class="bi bi-envelope-fill"></i> Alertas de Email
+    </button>
+  </div>
+</div>
+
+<!-- Profile Content -->
+<div class="profile-content">
+  <!-- Saved Ads Tab -->
+  <div id="saved-ads-tab" class="tab-content">
+    {% if saved_ads %}
+      {% for saved_ad in saved_ads %}
+      <div class="saved-item">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            {% if saved_ad.announcement.images and saved_ad.announcement.images|length > 0 %}
+              <img src="{% if saved_ad.announcement.images[0].image_url.startswith('http') %}{{ saved_ad.announcement.images[0].image_url }}{% else %}{{ url_for('static', filename=saved_ad.announcement.images[0].image_url) }}{% endif %}" 
+                   class="saved-ad-image" alt="{{ saved_ad.announcement.title }}">
+            {% else %}
+              <div class="saved-ad-image bg-light d-flex align-items-center justify-content-center">
+                <i class="bi bi-house text-muted"></i>
+              </div>
+            {% endif %}
+          </div>
+          <div class="col">
+            <h5 class="mb-1">{{ saved_ad.announcement.title }}</h5>
+            <p class="text-muted mb-1">{{ saved_ad.announcement.location.name if saved_ad.announcement.location else 'Ubicación no especificada' }}</p>
+            <p class="mb-1">
+              <strong class="text-success">{{ '{:,.0f}'.format(saved_ad.announcement.price | float).replace(',', '.') }} €</strong>
+              {% if saved_ad.announcement.rooms %} • {{ saved_ad.announcement.rooms }} hab.{% endif %}
+              {% if saved_ad.announcement.square_meters %} • {{ "%.0f"|format(saved_ad.announcement.square_meters|float) }} m²{% endif %}
+            </p>
+            <small class="text-muted">
+              <i class="bi bi-calendar"></i> Guardado el {{ saved_ad.saved_date.strftime('%d/%m/%Y') }}
+            </small>
+          </div>
+          <div class="col-auto">
+            <div class="d-flex flex-column gap-2">
+              <a href="{{ url_for('announcement_detail', announcement_id=saved_ad.announcement.id) }}" 
+                 class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-eye"></i> Ver
+              </a>
+              <button class="btn-unsave btn-sm" onclick="unsaveAd({{ saved_ad.announcement.id }}, this)">
+                <i class="bi bi-heart-fill"></i> Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-heart"></i>
+        <h4>No tienes anuncios guardados</h4>
+        <p>Cuando guardes anuncios que te interesen, aparecerán aquí.</p>
+        <a href="{{ url_for('inmobiliaria') }}" class="btn btn-primary">
+          <i class="bi bi-search"></i> Buscar Propiedades
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Saved Searches Tab -->
+  <div id="saved-searches-tab" class="tab-content" style="display: none;">
+    {% if saved_searches %}
+      {% for search in saved_searches %}
+      <div class="saved-item">
+        <div class="row align-items-center">
+          <div class="col">
+            <h5 class="mb-1">{{ search.search_name }}</h5>
+            <div class="saved-search-criteria mb-2">
+              {% set features = search.features or {} %}
+              {% set search_type = features.get('search_type', 'real_estate') %}
+              
+              {% if search_type == 'vehicle' %}
+                <!-- Vehicle Search Display -->
+                <span class="badge bg-primary mb-2">🚗 Búsqueda de Vehículos</span><br>
+                {% if features.get('category') %}<strong>Categoría:</strong> {{ features.category }} • {% endif %}
+                {% if features.get('make_id') %}<strong>Marca ID:</strong> {{ features.make_id }} • {% endif %}
+                {% if features.get('model_id') %}<strong>Modelo ID:</strong> {{ features.model_id }} • {% endif %}
+                {% if search.min_price %}<strong>Precio min:</strong> €{{ search.min_price }} • {% endif %}
+                {% if search.max_price %}<strong>Precio max:</strong> €{{ search.max_price }} • {% endif %}
+                {% if features.get('min_year') %}<strong>Año desde:</strong> {{ features.min_year }} • {% endif %}
+                {% if features.get('max_year') %}<strong>Año hasta:</strong> {{ features.max_year }} • {% endif %}
+                {% if features.get('fuel_type') %}<strong>Combustible:</strong> {{ features.fuel_type }} • {% endif %}
+                {% if features.get('transmission') %}<strong>Transmisión:</strong> {{ features.transmission }} • {% endif %}
+                {% if features.get('max_mileage') %}<strong>Km máx:</strong> {{ features.max_mileage }} • {% endif %}
+              {% else %}
+                <!-- Real Estate Search Display -->
+                <span class="badge bg-info mb-2">🏠 Búsqueda de Inmuebles</span><br>
+                {% if search.search_text %}<strong>Texto:</strong> "{{ search.search_text }}" • {% endif %}
+                {% if search.location %}<strong>Ubicación:</strong> {{ search.location }} • {% endif %}
+                {% if search.min_price %}<strong>Precio min:</strong> €{{ search.min_price }} • {% endif %}
+                {% if search.max_price %}<strong>Precio max:</strong> €{{ search.max_price }} • {% endif %}
+                {% if search.property_type %}<strong>Tipo:</strong> {{ search.property_type }} • {% endif %}
+                {% if search.min_rooms %}<strong>Habitaciones:</strong> {{ search.min_rooms }}+ • {% endif %}
+                {% if search.min_bathrooms %}<strong>Baños:</strong> {{ search.min_bathrooms }}+ • {% endif %}
+                {% if features %}
+                  {% for feature, value in features.items() %}
+                    {% if value and feature not in ['search_type', 'location_id', 'category', 'make_id', 'model_id', 'min_year', 'max_year', 'fuel_type', 'transmission', 'max_mileage', 'seller_type', 'condition', 'color'] %}
+                      <strong>{{ feature.replace('_', ' ').title() }}:</strong> Sí • 
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endif %}
+            </div>
+            <small class="text-muted">
+              <i class="bi bi-calendar"></i> Creada el {{ search.created_date.strftime('%d/%m/%Y') }}
+              {% if search.last_used_date %} • Última vez usada: {{ search.last_used_date.strftime('%d/%m/%Y') }}{% endif %}
+            </small>
+          </div>
+          <div class="col-auto">
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-run-search btn-sm" onclick="runSavedSearch({{ search.id }})">
+                <i class="bi bi-search"></i> Ejecutar
+              </button>
+              <button class="btn-unsave btn-sm" onclick="deleteSavedSearch({{ search.id }}, this)">
+                <i class="bi bi-trash"></i> Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-bookmark"></i>
+        <h4>No tienes búsquedas guardadas</h4>
+        <p>Cuando guardes búsquedas, aparecerán aquí para que puedas reutilizarlas fácilmente.</p>
+        <a href="{{ url_for('inmobiliaria') }}" class="btn btn-primary">
+          <i class="bi bi-search"></i> Crear Búsqueda
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Invitations Tab -->
+  <div id="invitations-tab" class="tab-content" style="display: none;">
+    <div class="saved-item">
+      <h5 class="mb-3"><i class="bi bi-gift"></i> Invitar Amigos y Ganar Puntos Glopy</h5>
+      <p class="text-muted mb-4">Invita a tus amigos a unirse a Glopy y gana <strong>50 puntos Glopy</strong> por cada amigo que se registre exitosamente.</p>
+      
+      <!-- Invitation Form -->
+      <form id="invitationForm" class="mb-4">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="mb-3">
+              <label for="inviteEmail" class="form-label">Email del amigo</label>
+              <input type="email" class="form-control" id="inviteEmail" name="email" 
+                     placeholder="amigo@ejemplo.com" required>
+              <div class="form-text">Envía una invitación personalizada a tu amigo</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label">&nbsp;</label>
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-send"></i> Enviar Invitación
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Invitation Status -->
+      <div id="invitationStatus" class="mb-4" style="display: none;"></div>
+      
+      <!-- Points Info -->
+      <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i>
+        <strong>¿Cómo funciona?</strong>
+        <ul class="mb-0 mt-2">
+          <li>Envía una invitación por email a tu amigo</li>
+          <li>Tu amigo recibe un enlace especial para registrarse</li>
+          <li>Cuando se registre, tú ganas <strong>50 puntos Glopy</strong> automáticamente</li>
+          <li>Los puntos se pueden usar para funciones premium en el futuro</li>
+        </ul>
+      </div>
+      
+      <!-- Points History -->
+      <div class="mb-4">
+        <h6><i class="bi bi-clock-history"></i> Historial de Puntos</h6>
+        <div id="pointsHistory" class="points-history">
+          <div class="text-center text-muted">
+            <i class="bi bi-hourglass-split"></i> Cargando historial...
+          </div>
+        </div>
+      </div>
+      
+      <!-- Invitation Link -->
+      <div class="alert alert-light">
+        <h6><i class="bi bi-link-45deg"></i> Tu Enlace de Invitación Personal</h6>
+        <p class="mb-2">Comparte este enlace directamente con tus amigos:</p>
+        <div class="input-group">
+          <input type="text" class="form-control" id="invitationLink" readonly 
+                 value="{{ url_for('register', _external=True) }}?ref={{ user.invitation_code or 'direct' }}">
+          <button class="btn btn-outline-secondary" type="button" onclick="copyInvitationLink()">
+            <i class="bi bi-clipboard"></i> Copiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Settings Tab -->
+  <div id="email-settings-tab" class="tab-content" style="display: none;">
+    <div class="saved-item">
+      <h5 class="mb-3"><i class="bi bi-envelope"></i> Configuración de Alertas de Email</h5>
+      <p class="text-muted mb-4">Recibe notificaciones por email cuando aparezcan nuevas propiedades que coincidan con tus búsquedas guardadas.</p>
+      
+      <form id="emailSettingsForm">
+        <div class="mb-4">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="emailAlertsEnabled" name="email_alerts_enabled">
+            <label class="form-check-label" for="emailAlertsEnabled">
+              <strong>Activar alertas de email</strong>
+            </label>
+            <div class="form-text">Recibir notificaciones cuando aparezcan propiedades que coincidan con tus búsquedas</div>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label for="emailFrequency" class="form-label">Frecuencia de alertas</label>
+          <select class="form-select" id="emailFrequency" name="email_frequency">
+            <option value="immediate">Inmediata</option>
+            <option value="daily">Diaria</option>
+            <option value="weekly">Semanal</option>
+          </select>
+          <div class="form-text">
+            <strong>Inmediata:</strong> Recibe alertas tan pronto como aparezcan propiedades<br>
+            <strong>Diaria:</strong> Recibe un resumen diario con todas las propiedades nuevas<br>
+            <strong>Semanal:</strong> Recibe un resumen semanal con todas las propiedades nuevas
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            <strong>Información:</strong> Las alertas se basan en tus búsquedas guardadas. 
+            Asegúrate de tener búsquedas guardadas para recibir alertas relevantes.
+          </div>
+        </div>
+        
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Guardar Configuración
+          </button>
+          <button type="button" class="btn btn-outline-secondary" onclick="testEmailAlert()">
+            <i class="bi bi-send"></i> Enviar Email de Prueba
+          </button>
+        </div>
+      </form>
+      
+      <div id="emailSettingsStatus" class="mt-3" style="display: none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Logo Upload Modal -->
+<div class="modal fade" id="logoUploadModal" tabindex="-1" aria-labelledby="logoUploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logoUploadModalLabel">
+          <i class="bi bi-camera"></i> Subir Logo de Empresa
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="logoUploadForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="logoFile" class="form-label">Seleccionar Logo</label>
+            <input type="file" class="form-control" id="logoFile" name="company_logo" accept="image/*" required>
+            <div class="form-text">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB</div>
+          </div>
+          <div class="mb-3">
+            <div id="logoPreview" style="display: none;">
+              <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 50%;">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="uploadLogo()">
+          <i class="bi bi-upload"></i> Subir Logo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Tab switching
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    
+    // Add active class to clicked tab
+    event.target.classList.add('active');
+    
+    // Load email settings if switching to email settings tab
+    if (tabName === 'email-settings') {
+        loadEmailSettings();
+    }
+    
+    // Load invitations data if switching to invitations tab
+    if (tabName === 'invitations') {
+        loadPointsHistory();
+    }
+}
+
+// Unsave ad
+function unsaveAd(announcementId, button) {
+    if (!confirm('¿Estás seguro de que quieres quitar este anuncio de guardados?')) {
+        return;
+    }
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Quitando...';
+    
+    fetch('/api/unsave-ad', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ announcement_id: announcementId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the item from DOM
+            button.closest('.saved-item').remove();
+            
+            // Update tab count
+            const savedAdsTab = document.querySelector('.profile-tab[onclick="showTab(\'saved-ads\')"]');
+            const currentCount = parseInt(savedAdsTab.textContent.match(/\((\d+)\)/)[1]);
+            savedAdsTab.innerHTML = savedAdsTab.innerHTML.replace(/\(\d+\)/, `(${currentCount - 1})`);
+            
+            showNotification('Anuncio eliminado de guardados');
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo eliminar el anuncio'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-heart-fill"></i> Quitar';
+    });
+}
+
+// Run saved search
+function runSavedSearch(searchId) {
+    try {
+        // Get the saved search data from the page
+        const searchItem = document.querySelector(`[onclick="runSavedSearch(${searchId})"]`).closest('.saved-item');
+        if (!searchItem) {
+            console.error('Search item not found for ID:', searchId);
+            alert('Error: No se pudo encontrar la búsqueda');
+            return;
+        }
+        
+        const searchName = searchItem.querySelector('h5')?.textContent || 'Búsqueda';
+        
+        // Show loading state
+        const button = searchItem.querySelector('[onclick*="runSavedSearch"]');
+        if (!button) {
+            console.error('Button not found');
+            alert('Error: No se pudo encontrar el botón');
+            return;
+        }
+        
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Ejecutando...';
+        
+        // Get the search criteria from the data attributes or make an API call
+        fetch(`/api/get-saved-search/${searchId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received search data:', data);
+            
+            if (!data || !data.success) {
+                throw new Error(data?.message || 'Error al cargar la búsqueda');
+            }
+            
+            if (!data.search) {
+                throw new Error('Datos de búsqueda no encontrados');
+            }
+            
+            // Build the search URL with the saved criteria
+            const searchUrl = buildSearchUrl(data.search);
+            
+            if (!searchUrl) {
+                throw new Error('Error al construir la URL de búsqueda');
+            }
+            
+            console.log('Redirecting to:', searchUrl);
+            
+            // Redirect to the search results
+            window.location.href = searchUrl;
+            
+            // Fallback: if redirect doesn't happen within 2 seconds, restore button
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        })
+        .catch(error => {
+            console.error('Error executing saved search:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            alert('Error al ejecutar la búsqueda: ' + (error.message || 'Error de conexión'));
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    } catch (error) {
+        console.error('Error in runSavedSearch:', error);
+        alert('Error inesperado: ' + error.message);
+        // Try to restore button state if we can find it
+        const searchItem = document.querySelector(`[onclick="runSavedSearch(${searchId})"]`)?.closest('.saved-item');
+        if (searchItem) {
+            const button = searchItem.querySelector('[onclick*="runSavedSearch"]');
+            if (button) {
+                button.innerHTML = '<i class="bi bi-search"></i> Ejecutar';
+                button.disabled = false;
+            }
+        }
+    }
+}
+
+// Build search URL from saved search criteria
+function buildSearchUrl(search) {
+    try {
+        if (!search) {
+            console.error('buildSearchUrl: search parameter is null or undefined');
+            return null;
+        }
+        
+        const params = new URLSearchParams();
+        
+        // Check if this is a vehicle search or real estate search
+        const features = search.features || {};
+        const searchType = features.search_type || 'real_estate';
+        
+        if (searchType === 'vehicle') {
+            // Build URL for vehicle search (/autos)
+            
+            // Price filters (common to both)
+            if (search.min_price != null && search.min_price !== '') {
+                params.append('min_price', search.min_price);
+            }
+            if (search.max_price != null && search.max_price !== '') {
+                params.append('max_price', search.max_price);
+            }
+            
+            // Location filter
+            if (features.location_id) {
+                params.append('location_id', features.location_id);
+            }
+            
+            // Vehicle-specific filters from features
+            if (features.category) params.append('category', features.category);
+            if (features.make_id) params.append('make_id', features.make_id);
+            if (features.model_id) params.append('model_id', features.model_id);
+            if (features.min_year) params.append('min_year', features.min_year);
+            if (features.max_year) params.append('max_year', features.max_year);
+            if (features.fuel_type) params.append('fuel_type', features.fuel_type);
+            if (features.transmission) params.append('transmission', features.transmission);
+            if (features.max_mileage) params.append('max_mileage', features.max_mileage);
+            if (features.seller_type) params.append('seller_type', features.seller_type);
+            if (features.condition) params.append('condition', features.condition);
+            if (features.color) params.append('color', features.color);
+            
+            const url = `/autos?${params.toString()}`;
+            console.log('Built vehicle search URL:', url);
+            return url;
+        } else {
+            // Build URL for real estate search (/inmobiliaria)
+            if (search.search_text) params.append('search_text', search.search_text);
+            if (search.location) params.append('location', search.location);
+            if (search.min_price != null && search.min_price !== '') {
+                params.append('min_price', search.min_price);
+            }
+            if (search.max_price != null && search.max_price !== '') {
+                params.append('max_price', search.max_price);
+            }
+            if (search.property_type) params.append('property_type', search.property_type);
+            if (search.min_rooms) params.append('rooms', search.min_rooms); // Note: backend expects 'rooms' not 'min_rooms'
+            if (search.min_bathrooms) params.append('bathrooms', search.min_bathrooms); // Note: backend expects 'bathrooms'
+            
+            // Add location_id from features if present
+            if (features.location_id) {
+                params.append('location_id', features.location_id);
+            }
+            
+            // Add real estate features (excluding vehicle-specific and metadata fields)
+            if (features) {
+                const excludeFields = ['search_type', 'location_id', 'category', 'make_id', 'model_id', 
+                                       'min_year', 'max_year', 'fuel_type', 'transmission', 'max_mileage', 
+                                       'seller_type', 'condition', 'color'];
+                for (const [feature, value] of Object.entries(features)) {
+                    if (value && !excludeFields.includes(feature)) {
+                        params.append(feature, '1');
+                    }
+                }
+            }
+            
+            const url = `/inmobiliaria?${params.toString()}`;
+            console.log('Built real estate search URL:', url);
+            return url;
+        }
+    } catch (error) {
+        console.error('Error in buildSearchUrl:', error);
+        return null;
+    }
+}
+
+// Delete saved search
+function deleteSavedSearch(searchId, button) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta búsqueda guardada?')) {
+        return;
+    }
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Eliminando...';
+    
+    fetch('/api/delete-saved-search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ search_id: searchId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the item from DOM
+            button.closest('.saved-item').remove();
+            
+            // Update tab count
+            const savedSearchesTab = document.querySelector('.profile-tab[onclick="showTab(\'saved-searches\')"]');
+            const currentCount = parseInt(savedSearchesTab.textContent.match(/\((\d+)\)/)[1]);
+            savedSearchesTab.innerHTML = savedSearchesTab.innerHTML.replace(/\(\d+\)/, `(${currentCount - 1})`);
+            
+            showNotification('Búsqueda eliminada exitosamente');
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo eliminar la búsqueda'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-trash"></i> Eliminar';
+    });
+}
+
+// Show notification
+function showNotification(message, isError = false) {
+    const notification = document.createElement('div');
+    notification.className = `save-notification ${isError ? 'error' : ''}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+// Email Settings Functions
+function loadEmailSettings() {
+    fetch('/api/email-alert-settings')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const settings = data.settings;
+                document.getElementById('emailAlertsEnabled').checked = settings.email_alerts_enabled;
+                document.getElementById('emailFrequency').value = settings.email_frequency;
+            } else {
+                console.error('Error loading email settings:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading email settings:', error);
+        });
+}
+
+function testEmailAlert() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+    button.disabled = true;
+    
+    fetch('/api/test-email-alert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showEmailStatus('success', 'Email de prueba enviado exitosamente. Revisa tu bandeja de entrada.');
+        } else {
+            showEmailStatus('error', 'Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error sending test email:', error);
+        showEmailStatus('error', 'Error al enviar email de prueba');
+    })
+    .finally(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function showEmailStatus(type, message) {
+    const statusDiv = document.getElementById('emailSettingsStatus');
+    statusDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} mt-3`;
+    statusDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+    statusDiv.style.display = 'block';
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Email Settings Form Submission
+document.getElementById('emailSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        email_alerts_enabled: formData.get('email_alerts_enabled') === 'on',
+        email_frequency: formData.get('email_frequency')
+    };
+    
+    fetch('/api/email-alert-settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showEmailStatus('success', 'Configuración de alertas guardada exitosamente');
+        } else {
+            showEmailStatus('error', 'Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving email settings:', error);
+        showEmailStatus('error', 'Error al guardar configuración');
+    });
+});
+
+// Invitation System Functions
+function loadPointsHistory() {
+    fetch('/api/points/transactions')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Points history data:', data); // Debug log
+            if (data.success && data.transactions !== undefined) {
+                displayPointsHistory(data.transactions);
+                updatePointsDisplay(data.total_points);
+            } else {
+                console.error('Invalid data format:', data);
+                document.getElementById('pointsHistory').innerHTML = 
+                    '<div class="text-center text-muted">Error al cargar el historial</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading points history:', error);
+            document.getElementById('pointsHistory').innerHTML = 
+                '<div class="text-center text-muted">Error al cargar el historial</div>';
+        });
+}
+
+function displayPointsHistory(transactions) {
+    const historyDiv = document.getElementById('pointsHistory');
+    
+    if (transactions.length === 0) {
+        historyDiv.innerHTML = '<div class="text-center text-muted">No hay transacciones de puntos aún</div>';
+        return;
+    }
+    
+    let html = '';
+    transactions.forEach(transaction => {
+        const date = new Date(transaction.created_at).toLocaleDateString('es-ES');
+        const pointsClass = transaction.points > 0 ? 'positive' : 'negative';
+        const pointsSign = transaction.points > 0 ? '+' : '';
+        
+        html += `
+            <div class="points-transaction">
+                <div class="transaction-info">
+                    <div class="transaction-description">${transaction.description || transaction.transaction_type}</div>
+                    <div class="transaction-date">${date}</div>
+                </div>
+                <div class="transaction-points ${pointsClass}">
+                    ${pointsSign}${transaction.points}
+                </div>
+            </div>
+        `;
+    });
+    
+    historyDiv.innerHTML = html;
+}
+
+function updatePointsDisplay(totalPoints) {
+    const pointsElement = document.getElementById('userPoints');
+    if (pointsElement) {
+        pointsElement.textContent = totalPoints;
+    }
+}
+
+function copyInvitationLink() {
+    const linkInput = document.getElementById('invitationLink');
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        showNotification('Enlace copiado al portapapeles');
+    } catch (err) {
+        // Fallback for modern browsers
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+            showNotification('Enlace copiado al portapapeles');
+        }).catch(() => {
+            showNotification('Error al copiar el enlace', true);
+        });
+    }
+}
+
+// Invitation Form Submission
+document.getElementById('invitationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('inviteEmail').value.trim();
+    if (!email) {
+        showInvitationStatus('error', 'Por favor ingresa un email válido');
+        return;
+    }
+    
+    const submitButton = this.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+    
+    fetch('/api/invite/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+    })
+    .then(response => {
+        return response.json().then(data => {
+            return { response, data };
+        });
+    })
+    .then(({ response, data }) => {
+        console.log('Invitation response:', response.status, data); // Debug log
+        if (data.message) {
+            if (response.ok) {
+                showInvitationStatus('success', data.message);
+                document.getElementById('inviteEmail').value = '';
+                // Reload points history to show any new transactions
+                loadPointsHistory();
+            } else {
+                showInvitationStatus('error', data.message);
+            }
+        } else {
+            console.error('No message in response:', data);
+            showInvitationStatus('error', 'Error inesperado al enviar la invitación');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending invitation:', error);
+        showInvitationStatus('error', 'Error de conexión al enviar la invitación');
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
+});
+
+function showInvitationStatus(type, message) {
+    const statusDiv = document.getElementById('invitationStatus');
+    statusDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+    statusDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+    statusDiv.style.display = 'block';
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
+}
+
+// Logo Upload Functions
+function showLogoUpload() {
+    const modal = new bootstrap.Modal(document.getElementById('logoUploadModal'));
+    modal.show();
+}
+
+function uploadLogo() {
+    const fileInput = document.getElementById('logoFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Por favor selecciona un archivo');
+        return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('El archivo es demasiado grande. Máximo 5MB');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('company_logo', file);
+    
+    const uploadBtn = document.querySelector('#logoUploadModal .btn-primary');
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Subiendo...';
+    
+    fetch('/api/upload-company-logo', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the profile avatar
+            const avatar = document.querySelector('.profile-avatar');
+            avatar.innerHTML = `<img src="${data.logo_url}" alt="Company Logo" class="company-logo">`;
+            
+            // Update the button text
+            const logoBtn = document.querySelector('[onclick="showLogoUpload()"]');
+            logoBtn.innerHTML = '<i class="bi bi-camera"></i> Cambiar Logo';
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('logoUploadModal'));
+            modal.hide();
+            
+            showNotification('Logo actualizado exitosamente');
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo subir el logo'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al subir el logo');
+    })
+    .finally(() => {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = originalText;
+    });
+}
+
+// File preview functionality
+document.getElementById('logoFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('logoPreview');
+            const previewImg = document.getElementById('previewImg');
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

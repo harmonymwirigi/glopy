@@ -1,0 +1,275 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #667eea;
+        transition: transform 0.2s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .activity-icon.users { background: #e3f2fd; color: #1976d2; }
+    .activity-icon.ads { background: #f3e5f5; color: #7b1fa2; }
+    .activity-icon.payments { background: #e8f5e8; color: #388e3c; }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .revenue-card {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .revenue-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-shield-check"></i> Panel de Administración
+                </h1>
+                <p class="mb-0 opacity-75">Bienvenido al panel de control de Glopy</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('home') }}" class="btn btn-outline-light me-2">
+                    <i class="bi bi-person"></i> Vista de Usuario
+                </a>
+                <a href="{{ url_for('auth_logout') }}" class="btn btn-outline-light">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+                <a href="{{ url_for('admin_commercial_ads') }}" class="nav-item">
+                    <i class="bi bi-megaphone-fill"></i> Anuncios Comerciales
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ total_users }}</div>
+                        <div class="stats-label">Usuarios Totales</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ total_ads }}</div>
+                        <div class="stats-label">Anuncios Totales</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ total_categories }}</div>
+                        <div class="stats-label">Categorías</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ total_payments }}</div>
+                        <div class="stats-label">Pagos Exitosos</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Revenue Card -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="revenue-card">
+                        <div class="revenue-amount">€{{ "%.2f"|format(total_revenue) }}</div>
+                        <div>Ingresos Totales</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="recent-activity">
+                        <h5 class="mb-3">
+                            <i class="bi bi-people text-primary"></i> Usuarios Recientes
+                        </h5>
+                        {% for user in recent_users %}
+                        <div class="activity-item">
+                            <div class="activity-icon users">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ user.name or 'Sin nombre' }}</div>
+                                <small class="text-muted">{{ user.email }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="recent-activity">
+                        <h5 class="mb-3">
+                            <i class="bi bi-house-door text-purple"></i> Anuncios Recientes
+                        </h5>
+                        {% for ad in recent_ads %}
+                        <div class="activity-item">
+                            <div class="activity-icon ads">
+                                <i class="bi bi-house"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ ad.title[:30] }}{% if ad.title|length > 30 %}...{% endif %}</div>
+                                <small class="text-muted">€{{ "%.0f"|format(ad.price) }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="recent-activity">
+                        <h5 class="mb-3">
+                            <i class="bi bi-credit-card text-success"></i> Pagos Recientes
+                        </h5>
+                        {% for payment in recent_payments %}
+                        <div class="activity-item">
+                            <div class="activity-icon payments">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">€{{ "%.2f"|format(payment.amount) }}</div>
+                                <small class="text-muted">{{ payment.created_at.strftime('%d/%m/%Y') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

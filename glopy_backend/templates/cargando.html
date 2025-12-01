@@ -1,0 +1,249 @@
+﻿{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+  <style>
+    /* Saved Ads Page Styles */
+    .saved-ads-header {
+      background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    
+    .saved-ads-header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .saved-ads-stats {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      backdrop-filter: blur(10px);
+    }
+    
+    .saved-ads-content {
+      background: white;
+      border-radius: 24px 24px 0 0;
+      margin-top: -20px;
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - 200px);
+      padding: 1.5rem;
+    }
+    
+    .saved-ad-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+      border: 1px solid #e9ecef;
+    }
+    
+    .saved-ad-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .saved-ad-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    
+    .saved-ad-content h5 {
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .saved-ad-price {
+      color: #28a745;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    
+    .saved-ad-details {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    .saved-date {
+      color: #6c757d;
+      font-size: 0.8rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .btn-unsave {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-unsave:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<!-- Saved Ads Header -->
+<div class="saved-ads-header">
+  <h1>
+    <i class="bi bi-heart-fill"></i>
+    Mis Anuncios Guardados
+  </h1>
+  <div class="saved-ads-stats">
+    <p class="mb-0">
+      <strong>{{ saved_ads|length }}</strong> 
+      {{ 'anuncio' if saved_ads|length == 1 else 'anuncios' }} guardados
+    </p>
+  </div>
+</div>
+
+<!-- Saved Ads Content -->
+<div class="saved-ads-content">
+  {% if saved_ads %}
+    {% for saved_ad in saved_ads %}
+    <div class="saved-ad-item">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          {% if saved_ad.announcement.images and saved_ad.announcement.images|length > 0 %}
+            <img src="{% if saved_ad.announcement.images[0].image_url.startswith('http') %}{{ saved_ad.announcement.images[0].image_url }}{% else %}{{ url_for('static', filename=saved_ad.announcement.images[0].image_url) }}{% endif %}" 
+                 class="saved-ad-image" alt="{{ saved_ad.announcement.title }}">
+          {% else %}
+            <div class="saved-ad-image bg-light d-flex align-items-center justify-content-center">
+              <i class="bi bi-house text-muted"></i>
+            </div>
+          {% endif %}
+        </div>
+        <div class="col">
+          <div class="saved-ad-content">
+            <h5>{{ saved_ad.announcement.title or 'Anuncio sin título' }}</h5>
+            <p class="saved-ad-price mb-1">{{ '{:,.0f}'.format(saved_ad.announcement.price | float).replace(',', '.') }} €</p>
+            <p class="saved-ad-details mb-1">
+              {{ saved_ad.announcement.location.name if saved_ad.announcement.location else 'Ubicación no especificada' }}
+              {% if saved_ad.announcement.rooms %} • {{ saved_ad.announcement.rooms }} hab.{% endif %}
+              {% if saved_ad.announcement.square_meters %} • {{ "%.0f"|format(saved_ad.announcement.square_meters|float) }} m²{% endif %}
+            </p>
+            <small class="saved-date">
+              <i class="bi bi-calendar"></i> Guardado el {{ saved_ad.saved_date.strftime('%d/%m/%Y') }}
+            </small>
+          </div>
+        </div>
+        <div class="col-auto">
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('announcement_detail', announcement_id=saved_ad.announcement.id) }}" 
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-eye"></i> Ver
+            </a>
+            <button class="btn-unsave btn-sm" onclick="unsaveAd({{ saved_ad.announcement.id }}, this)">
+              <i class="bi bi-heart-fill"></i> Quitar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-heart"></i>
+      <h4>No tienes anuncios guardados</h4>
+      <p>Cuando guardes anuncios que te interesen, aparecerán aquí.</p>
+      <a href="{{ url_for('inmobiliaria') }}" class="btn btn-primary">
+        <i class="bi bi-search"></i> Buscar Propiedades
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Bottom Navigation -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Unsave ad function
+function unsaveAd(announcementId, button) {
+    if (!confirm('¿Estás seguro de que quieres quitar este anuncio de guardados?')) {
+        return;
+    }
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Quitando...';
+    
+    fetch('/api/unsave-ad', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ announcement_id: announcementId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the item from DOM
+            button.closest('.saved-ad-item').remove();
+            
+            // Show notification
+            showNotification('Anuncio eliminado de guardados');
+            
+            // Reload page if no more saved ads
+            const remainingItems = document.querySelectorAll('.saved-ad-item');
+            if (remainingItems.length === 0) {
+                location.reload();
+            }
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo eliminar el anuncio'));
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-heart-fill"></i> Quitar';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-heart-fill"></i> Quitar';
+    });
+}
+
+// Show notification function
+function showNotification(message, isError = false) {
+    const notification = document.createElement('div');
+    notification.className = `save-notification ${isError ? 'error' : ''}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+</script>
+
+{% endblock %}

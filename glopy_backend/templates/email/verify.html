@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verifica tu cuenta</title>
+  <style>
+    :root {
+      --primary: {{ primary_color or '#1060ff' }};
+      --secondary: {{ secondary_color or '#0b4ad6' }};
+    }
+    body { margin:0; padding:0; background:#f6f7fb; }
+    .wrap { width:100%; padding: 24px 0; }
+    .box { max-width: 600px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; line-height: 1.5; color: #111827; background:#ffffff; border-radius: 12px; overflow:hidden; box-shadow: 0 3px 14px rgba(0,0,0,0.06); }
+    .header { background: linear-gradient(135deg, var(--secondary), var(--primary)); padding: 24px; text-align: center; }
+    .logo { max-height: 42px; }
+    .title { color:#fff; margin: 8px 0 0; font-size: 20px; font-weight: 700; }
+    .content { padding: 28px; }
+    .hi { margin-top:0; font-size: 18px; font-weight: 600; }
+    .btn { background: var(--primary); color: #fff; padding: 12px 18px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; }
+    .link { word-break: break-all; color: var(--primary); }
+    .muted { color: #6b7280; font-size: 12px; }
+    .divider { height:1px; background:#e5e7eb; margin: 24px 0; }
+    .footer { text-align:center; padding: 18px; color:#6b7280; font-size: 12px; }
+    .footer a { color: var(--primary); text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="box">
+      <div class="header">
+        {% if logo_url %}
+          <img class="logo" src="{{ logo_url }}" alt="{{ app_name }}" />
+        {% else %}
+          <div class="title">{{ app_name }}</div>
+        {% endif %}
+      </div>
+      <div class="content">
+        <p class="hi">Hola {{ user_name }},</p>
+        <p>
+          Gracias por registrarte en {{ app_name }}. Para activar tu cuenta, verifica tu email haciendo clic en el botón:
+        </p>
+        <p style="margin: 22px 0;">
+          <a class="btn" href="{{ verify_url }}" target="_blank" rel="noopener">Verificar cuenta</a>
+        </p>
+        <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+        <p><a class="link" href="{{ verify_url }}" target="_blank" rel="noopener">{{ verify_url }}</a></p>
+        <div class="divider"></div>
+        <p class="muted">Si tú no solicitaste este registro, puedes ignorar este correo.</p>
+      </div>
+      <div class="footer">
+        {% if app_url %}
+          <div><a href="{{ app_url }}" target="_blank" rel="noopener">{{ app_url }}</a></div>
+        {% endif %}
+        {% if support_email %}
+          <div>Soporte: <a href="mailto:{{ support_email }}">{{ support_email }}</a></div>
+        {% endif %}
+        <div>&copy; {{ app_name }}. Todos los derechos reservados.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

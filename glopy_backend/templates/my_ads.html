@@ -1,0 +1,336 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/my_ads.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="my-ads-container">
+    
+    <!-- Top Navigation Bar -->
+    <nav class="my-ads-navbar">
+        <div class="navbar-content">
+            <button class="nav-back-btn" onclick="goBack()">
+                <i class="bi bi-chevron-left"></i>
+                <span>Volver</span>
+            </button>
+            <div class="navbar-title">
+                <h1>Mis Anuncios</h1>
+            </div>
+            <div class="navbar-actions">
+                <a href="{{ url_for('create_ad') }}" class="navbar-btn create-btn" title="Crear nuevo anuncio">
+                    <i class="bi bi-plus"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- User Stats Section -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-house-door"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_ads }}</span>
+                    <span class="stat-label">Total Anuncios</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_views }}</span>
+                    <span class="stat-label">Visualizaciones</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ active_ads }}</span>
+                    <span class="stat-label">Activos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Announcements List -->
+    <div class="announcements-section">
+        {% if announcements %}
+            <div class="section-header">
+                <h2>Todos mis anuncios</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                    <button class="filter-btn" data-filter="active">Activos</button>
+                    <button class="filter-btn" data-filter="inactive">Inactivos</button>
+                </div>
+            </div>
+            
+            <div class="announcements-grid">
+                {% for announcement in announcements %}
+                <div class="announcement-card" data-status="{{ 'active' if announcement.is_active else 'inactive' }}">
+                    <div class="card-image">
+                        {% if announcement.images and announcement.images|length > 0 %}
+                            <img src="{% if announcement.images[0].image_url.startswith('http') %}{{ announcement.images[0].image_url }}{% else %}{{ url_for('static', filename=announcement.images[0].image_url) }}{% endif %}" 
+                                 alt="{{ announcement.title }}"
+                                 onerror="this.src='{{ url_for('static', filename='LOGOS/Logo_Glopy.png') }}'">
+                        {% elif announcement.image %}
+                            <img src="{% if announcement.image.startswith('http') %}{{ announcement.image }}{% else %}{{ url_for('static', filename=announcement.image) }}{% endif %}" 
+                                 alt="{{ announcement.title }}"
+                                 onerror="this.src='{{ url_for('static', filename='LOGOS/Logo_Glopy.png') }}'">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="bi bi-image"></i>
+                                <span>Sin imagen</span>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Status Badge -->
+                        <div class="status-badge {{ 'active' if announcement.is_active else 'inactive' }}">
+                            {{ 'Activo' if announcement.is_active else 'Inactivo' }}
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="card-actions">
+                            <button class="action-btn edit-btn" onclick="editAnnouncement({{ announcement.id }})" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-btn view-btn" onclick="viewAnnouncement({{ announcement.id }})" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteAnnouncement({{ announcement.id }})" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ announcement.title or 'Sin título' }}</h3>
+                            <span class="card-price">{{ '{:,.0f}'.format(announcement.price|float).replace(',', '.') if announcement.price else '0' }}€</span>
+                        </div>
+                        
+                        <div class="card-details">
+                            <div class="card-location">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>{{ announcement.location.name if announcement.location else 'Ubicación no especificada' }}</span>
+                            </div>
+                            
+                            <div class="card-specs">
+                                {% if announcement.rooms %}
+                                <span class="spec">
+                                    <i class="bi bi-door-open"></i>
+                                    {{ announcement.rooms }} hab.
+                                </span>
+                                {% endif %}
+                                {% if announcement.bathrooms %}
+                                <span class="spec">
+                                    <i class="bi bi-droplet"></i>
+                                    {{ announcement.bathrooms }} baños
+                                </span>
+                                {% endif %}
+                                {% if announcement.square_meters %}
+                                <span class="spec">
+                                    <i class="bi bi-rulers"></i>
+                                    {{ "%.0f"|format(announcement.square_meters|float) }} m²
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-meta">
+                                <span class="publish-date">
+                                    <i class="bi bi-calendar"></i>
+                                    Publicado: {{ announcement.published_at.strftime('%d/%m/%Y') if announcement.published_at else 'N/A' }}
+                                </span>
+                                <span class="views-count">
+                                    <i class="bi bi-eye"></i>
+                                    {{ announcement.views or 0 }} vistas
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="card-buttons">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewAnnouncement({{ announcement.id }})">
+                                    <i class="bi bi-eye me-1"></i>Ver Detalle
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="editAnnouncement({{ announcement.id }})">
+                                    <i class="bi bi-pencil me-1"></i>Editar
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="shareAnnouncement({{ announcement.id }})">
+                                            <i class="bi bi-share me-2"></i>Compartir
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="duplicateAnnouncement({{ announcement.id }})">
+                                            <i class="bi bi-files me-2"></i>Duplicar
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteAnnouncement({{ announcement.id }})">
+                                            <i class="bi bi-trash me-2"></i>Eliminar
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-house-add"></i>
+                </div>
+                <h2>¡Aún no tienes anuncios!</h2>
+                <p>Crea tu primer anuncio y comienza a recibir interesados en tu propiedad.</p>
+                <a href="{{ url_for('create_ad') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Crear mi primer anuncio
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fab-container">
+    <a href="{{ url_for('create_ad') }}" class="fab-primary" title="Crear nuevo anuncio">
+        <i class="bi bi-plus"></i>
+    </a>
+</div>
+
+<!-- Bottom Navigation -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Navigation functions
+function goBack() {
+    if (document.referrer) {
+        history.back();
+    } else {
+        window.location.href = "{{ url_for('home') }}";
+    }
+}
+
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const announcementCards = document.querySelectorAll('.announcement-card');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter cards
+            announcementCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (filter === 'active' && status === 'active') {
+                    card.style.display = 'block';
+                } else if (filter === 'inactive' && status === 'inactive') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+
+// Announcement management functions
+function viewAnnouncement(id) {
+    window.location.href = `/anuncio/${id}`;
+}
+
+function editAnnouncement(id) {
+    // This would redirect to an edit form
+    showNotification('Función de edición próximamente', 'info');
+}
+
+function deleteAnnouncement(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este anuncio?')) {
+        fetch(`/api/delete-announcement/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Anuncio eliminado correctamente', 'success');
+                // Remove the card from DOM
+                const card = document.querySelector(`[data-announcement-id="${id}"]`);
+                if (card) {
+                    card.remove();
+                }
+                // Refresh page to update stats
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showNotification('Error al eliminar el anuncio', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error al eliminar el anuncio', 'error');
+        });
+    }
+}
+
+function shareAnnouncement(id) {
+    const url = `${window.location.origin}/anuncio/${id}`;
+    if (navigator.share) {
+        navigator.share({
+            title: 'Mira este anuncio en Glopy',
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            showNotification('Enlace copiado al portapapeles', 'success');
+        });
+    }
+}
+
+function duplicateAnnouncement(id) {
+    showNotification('Función de duplicación próximamente', 'info');
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Hide notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .user-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .badge-admin {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .badge-premium {
+        background: #ffc107;
+        color: #212529;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .badge-verified {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .badge-company {
+        background: #17a2b8;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .search-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-people"></i> Gestión de Usuarios
+                </h1>
+                <p class="mb-0 opacity-75">Administra usuarios, permisos y estados</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item active">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Search Box -->
+            <div class="search-box">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Buscar por nombre o email..." 
+                               value="{{ search }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Users List -->
+            {% for user in users.items %}
+            <div class="user-card">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="user-avatar">
+                            {{ (user.name or user.email)[0].upper() }}
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-1">{{ user.name or 'Sin nombre' }}</h5>
+                                <p class="text-muted mb-1">{{ user.email }}</p>
+                                <small class="text-muted">
+                                    Registrado: {{ user.created_at.strftime('%d/%m/%Y') }}
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    {% if user.is_admin %}
+                                    <span class="badge-admin">Admin</span>
+                                    {% endif %}
+                                    {% if user.is_premium %}
+                                    <span class="badge-premium">Premium</span>
+                                    {% endif %}
+                                    {% if user.is_verified %}
+                                    <span class="badge-verified">Verificado</span>
+                                    {% endif %}
+                                    {% if user.is_company %}
+                                    <span class="badge-company">Empresa</span>
+                                    {% endif %}
+                                </div>
+                                {% if user.is_company and user.cif %}
+                                <div class="text-muted">
+                                    <small>
+                                        <strong>CIF:</strong> {{ user.cif }}
+                                    </small>
+                                </div>
+                                {% endif %}
+                                <div class="text-muted">
+                                    <small>
+                                        Anuncios gratuitos usados: {{ user.free_ads_used }}<br>
+                                        Puntos Glopy: {{ user.glopy_points }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group-vertical" role="group">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    onclick="toggleAdmin({{ user.id }}, {{ user.is_admin|lower }})">
+                                {% if user.is_admin %}
+                                <i class="bi bi-shield-x"></i> Quitar Admin
+                                {% else %}
+                                <i class="bi bi-shield-check"></i> Hacer Admin
+                                {% endif %}
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" 
+                                    onclick="togglePremium({{ user.id }}, {{ user.is_premium|lower }})">
+                                {% if user.is_premium %}
+                                <i class="bi bi-star"></i> Quitar Premium
+                                {% else %}
+                                <i class="bi bi-star-fill"></i> Hacer Premium
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if users.pages > 1 %}
+            <nav aria-label="Paginación de usuarios">
+                <ul class="pagination justify-content-center">
+                    {% if users.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_users', page=users.prev_num, search=search) }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in users.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != users.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_users', page=page_num, search=search) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_users', page=users.next_num, search=search) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAdmin(userId, isAdmin) {
+    const action = isAdmin ? 'quitar admin' : 'hacer admin';
+    if (!confirm(`¿Estás seguro de que quieres ${action} a este usuario?`)) {
+        return;
+    }
+    
+    fetch(`/api/admin/users/${userId}/toggle-admin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al actualizar el usuario', 'error');
+    });
+}
+
+function togglePremium(userId, isPremium) {
+    const action = isPremium ? 'quitar premium' : 'hacer premium';
+    if (!confirm(`¿Estás seguro de que quieres ${action} a este usuario?`)) {
+        return;
+    }
+    
+    fetch(`/api/admin/users/${userId}/toggle-premium`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al actualizar el usuario', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

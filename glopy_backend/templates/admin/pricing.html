@@ -1,0 +1,267 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .pricing-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .price-display {
+        background: linear-gradient(135deg, #4caf50, #45a049);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .price-amount {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        border-color: #667eea;
+    }
+    
+    .btn-primary:hover {
+        background: #5a6fd8;
+        border-color: #5a6fd8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-currency-euro"></i> Configuración de Precios
+                </h1>
+                <p class="mb-0 opacity-75">Gestiona los precios para anuncios premium</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item active">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Current Pricing Display -->
+            <div class="price-display">
+                <div class="price-amount">€{{ "%.2f"|format(pricing_plan.price_per_ad) }}</div>
+                <div>Precio por anuncio premium</div>
+                <small class="opacity-75">{{ pricing_plan.max_free_ads }} anuncios gratuitos incluidos</small>
+            </div>
+            
+            <!-- Pricing Configuration Form -->
+            <div class="pricing-card">
+                <h4 class="mb-4">
+                    <i class="bi bi-gear"></i> Configurar Precios
+                </h4>
+                
+                <form id="pricingForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Nombre del Plan</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ pricing_plan.name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="price_per_ad" class="form-label">Precio por Anuncio (€)</label>
+                            <input type="number" class="form-control" id="price_per_ad" name="price_per_ad" 
+                                   value="{{ pricing_plan.price_per_ad }}" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ pricing_plan.description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="max_free_ads" class="form-label">Anuncios Gratuitos Incluidos</label>
+                        <input type="number" class="form-control" id="max_free_ads" name="max_free_ads" 
+                               value="{{ pricing_plan.max_free_ads }}" min="0" required>
+                        <div class="form-text">
+                            Número de anuncios que los usuarios pueden publicar gratis antes de requerir pago
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> Actualizar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Pricing Information -->
+            <div class="pricing-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-info-circle"></i> Información sobre Precios
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Anuncios Gratuitos</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check text-success"></i> Hasta {{ pricing_plan.max_free_ads }} anuncios por usuario</li>
+                            <li><i class="bi bi-check text-success"></i> Sin costo adicional</li>
+                            <li><i class="bi bi-check text-success"></i> Funcionalidad completa</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Anuncios Premium</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check text-success"></i> €{{ "%.2f"|format(pricing_plan.price_per_ad) }} por anuncio adicional</li>
+                            <li><i class="bi bi-check text-success"></i> Pago único por anuncio</li>
+                            <li><i class="bi bi-check text-success"></i> Procesado con Stripe</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('pricingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        price_per_ad: parseFloat(formData.get('price_per_ad')),
+        max_free_ads: parseInt(formData.get('max_free_ads'))
+    };
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Actualizando...';
+    submitBtn.disabled = true;
+    
+    fetch('/api/admin/pricing/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Configuración de precios actualizada exitosamente', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(data.message || 'Error al actualizar la configuración', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al actualizar la configuración', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,839 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+<style>
+/* Override for vehicles page */
+.search-header-inmo {
+    background: linear-gradient(135deg, #0071c2, #00a5e5);
+}
+
+
+/* Compact Category Pills */
+.category-pill {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.category-pill:hover {
+    background: #0071c2;
+    color: white;
+    border-color: #0071c2;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,113,194,0.2);
+}
+
+.category-pill.active {
+    background: #0071c2;
+    color: white;
+    border-color: #0071c2;
+    box-shadow: 0 2px 8px rgba(0,113,194,0.3);
+}
+
+.category-pill i {
+    font-size: 1rem;
+}
+
+/* Small Form Elements */
+.form-label-sm {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.form-control-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+/* Better Filter Layout for Large Screens */
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: end;
+    justify-content: space-between;
+}
+
+.filter-group {
+    min-width: 140px;
+    flex: 1;
+    max-width: 200px;
+}
+
+.price-range {
+    min-width: 180px;
+    max-width: 220px;
+}
+
+.search-group {
+    min-width: 120px;
+    max-width: 140px;
+}
+
+.price-inputs, .year-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-inputs input, .year-inputs input {
+    flex: 1;
+    min-width: 60px;
+}
+
+.price-separator, .year-separator {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.search-btn {
+    background: #0071c2 !important;
+    border-color: #0071c2 !important;
+    width: 100%;
+    height: 38px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Vehicles Grid Layout */
+.vehicles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vehicle-item {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Better card sizing for large screens */
+.vehicle-card {
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+.vehicle-image-container {
+    height: 180px;
+    flex-shrink: 0;
+}
+
+.vehicle-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100px;
+}
+
+.vehicle-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.vehicle-price {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.vehicle-specs {
+    margin-bottom: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .filters-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .filter-group {
+        max-width: 100%;
+        min-width: auto;
+    }
+    
+    .price-inputs, .year-inputs {
+        gap: 0.25rem;
+    }
+    
+    .vehicles-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .vehicles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+    
+    .vehicle-card {
+        min-height: 300px;
+    }
+    
+    .vehicle-image-container {
+        height: 200px;
+    }
+}
+
+.filters-area {
+    background: white;
+    border-radius: 16px;
+    margin: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.filter-title {
+    color: #0071c2;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label {
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0071c2;
+    box-shadow: 0 0 0 0.2rem rgba(0,113,194,0.25);
+    background: white;
+}
+
+.vehicle-card {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.vehicle-image-container {
+    position: relative;
+    padding-top: 66.67%; /* 3:2 aspect ratio */
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.vehicle-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.vehicle-card:hover .vehicle-image-container img {
+    transform: scale(1.05);
+}
+
+.vehicle-details {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: white;
+}
+
+.vehicle-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0071c2;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.vehicle-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.vehicle-specs {
+    color: #6c757d;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.vehicle-location {
+    color: #6c757d;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.vehicle-badges {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    z-index: 10;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-featured { background: #ffc107; color: #000; }
+.badge-new { background: #28a745; color: #fff; }
+.badge-urgent { background: #dc3545; color: #fff; }
+.badge-guaranteed { background: #17a2b8; color: #fff; }
+
+.commercial-ad-card {
+    border: 3px solid #ffc107 !important;
+    background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+}
+
+.sponsored-badge {
+    background: #ffc107 !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    font-size: 0.7rem !important;
+}
+
+.results-header {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.results-header h5 {
+    color: #0071c2;
+    font-weight: 600;
+    margin: 0;
+}
+
+.no-results {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.no-results h4 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.no-results .btn {
+    background: #0071c2;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+}
+
+.no-results .btn:hover {
+    background: #005a9c;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header with search and filters - EXACTLY like inmobiliaria -->
+<div class="search-header-inmo">
+    <div class="top-bar">
+        <a href="{{ url_for('home') }}" class="back-arrow-inmo"><i class="bi bi-chevron-left"></i></a>
+        <div class="search-box-inmo">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="Buscar vehículo...">
+        </div>
+        <a href="#" class="map-button">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Mapa</span>
+        </a>
+    </div>
+    <div class="filter-pills">
+        <button class="btn btn-pill active" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+            <i class="bi bi-sliders"></i> Filtros
+        </button>
+    </div>
+</div>
+
+<!-- Compact and Beautiful Filters -->
+<div class="filters-area">
+    <form id="searchForm" method="GET" action="{{ url_for('autos') }}">
+        <input type="hidden" name="category" value="{{ selected_category or '' }}">
+        
+        <!-- Vehicle Categories - Compact Row -->
+        <div class="mb-3">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="fw-bold text-muted me-2">Tipo:</span>
+                {% for category in popular_categories %}
+                <a href="{{ url_for('autos', category=category.slug) }}" 
+                   class="category-pill {% if selected_category == category.slug %}active{% endif %}">
+                    <i class="{{ category.icon }}"></i> {{ category.name }}
+                </a>
+                {% endfor %}
+                <button type="button" class="category-pill" data-bs-toggle="collapse" data-bs-target="#allCategories">
+                    <i class="bi bi-three-dots"></i> Más
+                </button>
+            </div>
+            
+            <!-- All Categories (Collapsed) -->
+            <div class="collapse mt-2" id="allCategories">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for category in categories %}
+                        {% if not category.is_popular %}
+                        <a href="{{ url_for('autos', category=category.slug) }}" class="category-pill">
+                            <i class="{{ category.icon }}"></i> {{ category.name }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Filters - Better Organized for Large Screens -->
+        <div class="filters-row">
+            <!-- Left Group: Make & Model -->
+            <div class="filter-group">
+                <label class="form-label-sm">Marca</label>
+                <select class="form-control" id="makeSelect" name="make_id" onchange="loadModels(this.value)">
+                    <option value="">Todas las marcas</option>
+                    {% for make in makes %}
+                    <option value="{{ make.id }}" {% if selected_make and selected_make.id == make.id %}selected{% endif %}>
+                        {{ make.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="form-label-sm">Modelo</label>
+                <select class="form-control" id="modelSelect" name="model_id" {% if not selected_make %}disabled{% endif %}>
+                    <option value="">Selecciona marca</option>
+                    {% if selected_model %}
+                    <option value="{{ selected_model.id }}" selected>{{ selected_model.name }}</option>
+                    {% endif %}
+                </select>
+            </div>
+            
+            <!-- Middle Group: Price Range -->
+            <div class="filter-group price-range">
+                <label class="form-label-sm">Precio (€)</label>
+                <div class="price-inputs">
+                    <input type="number" class="form-control" name="min_price" 
+                           placeholder="Mín" value="{{ filters.min_price or '' }}">
+                    <span class="price-separator">-</span>
+                    <input type="number" class="form-control" name="max_price" 
+                           placeholder="Máx" value="{{ filters.max_price or '' }}">
+                </div>
+            </div>
+            
+            <!-- Right Group: Year & Fuel -->
+            <div class="filter-group">
+                <label class="form-label-sm">Año</label>
+                <div class="year-inputs">
+                    <input type="number" class="form-control" name="min_year" 
+                           placeholder="Desde" value="{{ filters.min_year or '' }}">
+                    <span class="year-separator">-</span>
+                    <input type="number" class="form-control" name="max_year" 
+                           placeholder="Hasta" value="{{ filters.max_year or '' }}">
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="form-label-sm">Combustible</label>
+                <select class="form-control" name="fuel_type">
+                    <option value="">Todos</option>
+                    <option value="Gasolina" {% if filters.fuel_type == 'Gasolina' %}selected{% endif %}>Gasolina</option>
+                    <option value="Diesel" {% if filters.fuel_type == 'Diesel' %}selected{% endif %}>Diésel</option>
+                    <option value="Híbrido" {% if filters.fuel_type == 'Híbrido' %}selected{% endif %}>Híbrido</option>
+                    <option value="Eléctrico" {% if filters.fuel_type == 'Eléctrico' %}selected{% endif %}>Eléctrico</option>
+                </select>
+            </div>
+            
+            <!-- Search Button -->
+            <div class="filter-group search-group">
+                <button type="submit" class="btn btn-primary search-btn">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Results Header -->
+<div class="results-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h5><i class="bi bi-search"></i> {{ vehicles|length }} vehículos encontrados</h5>
+            {% if session.user_id %}
+            <button class="btn btn-outline-primary btn-sm mt-2" onclick="showSaveSearchModal()">
+                <i class="bi bi-bookmark"></i> Guardar búsqueda
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Results Grid - Better for Large Screens -->
+<div class="container-fluid px-3">
+    <div class="vehicles-grid" id="vehiclesContainer">
+        {% if vehicles %}
+            {% for vehicle in vehicles %}
+                {% if vehicle.is_commercial is defined and vehicle.is_commercial %}
+                    <!-- COMMERCIAL AD -->
+                    <div class="vehicle-item commercial-ad-item" data-ad-id="{{ vehicle.id }}">
+                        <div class="vehicle-card commercial-ad-card">
+                            <div class="sponsored-badge" style="position: absolute; top: 8px; left: 8px; z-index: 10;">
+                                <i class="bi bi-megaphone-fill"></i> PATROCINADO
+                            </div>
+                            <a href="#" class="commercial-ad-link listing-card-link" data-ad-id="{{ vehicle.id }}" data-target="{{ vehicle.target_url }}">
+                                <div class="vehicle-image-container">
+                                    <img src="{{ vehicle.image_url }}" class="announcement-image" alt="{{ vehicle.title }}">
+                                </div>
+                                <div class="vehicle-details">
+                                    <div class="vehicle-title">{{ vehicle.title }}</div>
+                                    <p class="text-muted mb-2">{{ vehicle.description }}</p>
+                                    <div class="d-flex align-items-center mb-2">
+                                        {% if vehicle.company_logo %}
+                                        <img src="{{ vehicle.company_logo }}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
+                                        {% endif %}
+                                        <strong>{{ vehicle.company_name }}</strong>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" style="background: #0071c2; border-color: #0071c2;">{{ vehicle.call_to_action }}</button>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- REGULAR VEHICLE -->
+                    <div class="vehicle-item">
+                        <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="listing-card-link">
+                            <div class="vehicle-card">
+                                <div class="vehicle-image-container">
+                                    {% if vehicle.images and vehicle.images|length > 0 %}
+                                        <img src="{{ vehicle.images[0].image_url }}" class="announcement-image" alt="{{ vehicle.title }}">
+                                    {% else %}
+                                        <div class="d-flex align-items-center justify-content-center h-100" style="background: #f8f9fa;">
+                                            <i class="bi bi-car-front" style="font-size: 3rem; color: #0071c2;"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Badges -->
+                                    <div class="vehicle-badges">
+                                        {% if vehicle.is_featured %}<span class="badge badge-featured">⭐ Destacado</span>{% endif %}
+                                        {% if vehicle.is_new %}<span class="badge badge-new">🆕 Nuevo</span>{% endif %}
+                                        {% if vehicle.is_urgent %}<span class="badge badge-urgent">🔥 Urgente</span>{% endif %}
+                                        {% if vehicle.is_guaranteed %}<span class="badge badge-guaranteed">✓ Garantizado</span>{% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="vehicle-details">
+                                    <div class="vehicle-price">{{ "{:,.0f}".format(vehicle.price).replace(',', '.') }} €</div>
+                                    <div class="vehicle-title">{{ vehicle.title }}</div>
+                                    
+                                    <div class="vehicle-specs">
+                                        <span><i class="bi bi-calendar3"></i> {{ vehicle.year }}</span>
+                                        {% if vehicle.mileage %}
+                                        <span><i class="bi bi-speedometer2"></i> {{ "{:,.0f}".format(vehicle.mileage).replace(',', '.') }} km</span>
+                                        {% endif %}
+                                        {% if vehicle.fuel_type %}
+                                        <span><i class="bi bi-fuel-pump"></i> {{ vehicle.fuel_type }}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if vehicle.location %}
+                                    <div class="vehicle-location">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <span>{{ vehicle.location.name }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="no-results">
+                    <i class="bi bi-search"></i>
+                    <h4>No se encontraron vehículos</h4>
+                    <p>Intenta ajustar los filtros de búsqueda o explorar otras categorías.</p>
+                    <a href="{{ url_for('autos') }}" class="btn">Limpiar filtros</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Save Search Modal -->
+{% if session.user_id %}
+<div class="modal fade" id="saveSearchModal" tabindex="-1" aria-labelledby="saveSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveSearchModalLabel">Guardar Búsqueda de Vehículos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="searchName" class="form-label">Nombre de la búsqueda</label>
+                    <input type="text" class="form-control" id="searchName" placeholder="Ej: Coches en Madrid, menos de 15000€">
+                </div>
+                <div class="mb-3">
+                    <label for="searchDescription" class="form-label">Descripción (opcional)</label>
+                    <textarea class="form-control" id="searchDescription" rows="3" placeholder="Describe qué tipo de vehículo buscas..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveCurrentSearch()">
+                    <i class="bi bi-bookmark"></i> Guardar Búsqueda
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Bottom Navigation -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Load models when make is selected
+async function loadModels(makeId) {
+    const modelSelect = document.getElementById('modelSelect');
+    
+    if (!makeId) {
+        modelSelect.disabled = true;
+        modelSelect.innerHTML = '<option value="">Selecciona marca primero</option>';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/vehicles/models/${makeId}`);
+        const models = await response.json();
+        
+        modelSelect.disabled = false;
+        modelSelect.innerHTML = '<option value="">Todos los modelos</option>';
+        
+        models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            modelSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading models:', error);
+    }
+}
+
+// Load models on page load if make is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const makeSelect = document.getElementById('makeSelect');
+    if (makeSelect.value) {
+        loadModels(makeSelect.value);
+    }
+});
+
+// Commercial Ads Tracking
+document.querySelectorAll('.commercial-ad-item').forEach(adItem => {
+    const adId = adItem.dataset.adId;
+    fetch(`/api/commercial-ads/${adId}/view`, {method: 'POST'}).catch(err => console.log('View tracking error:', err));
+});
+
+document.querySelectorAll('.commercial-ad-link').forEach(link => {
+    link.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const adId = this.dataset.adId;
+        const targetUrl = this.dataset.target;
+        
+        try {
+            await fetch(`/api/commercial-ads/${adId}/click`, {method: 'POST'});
+            window.open(targetUrl, '_blank');
+        } catch (error) {
+            console.error('Click tracking error:', error);
+            window.open(targetUrl, '_blank');
+        }
+    });
+});
+
+// Session memory - save search state
+const searchForm = document.getElementById('searchForm');
+if (searchForm) {
+    searchForm.addEventListener('submit', function() {
+        const formData = new FormData(searchForm);
+        const searchState = {};
+        for (let [key, value] of formData.entries()) {
+            if (value) searchState[key] = value;
+        }
+        localStorage.setItem('autosSearchState', JSON.stringify(searchState));
+    });
+}
+
+// Restore search state on page load
+window.addEventListener('DOMContentLoaded', function() {
+    const savedState = localStorage.getItem('autosSearchState');
+    if (savedState && !window.location.search) {
+        const state = JSON.parse(savedState);
+        // Redirect to search with saved filters
+        const params = new URLSearchParams(state);
+        window.location.href = `{{ url_for('autos') }}?${params.toString()}`;
+    }
+});
+
+// Save Search Modal
+function showSaveSearchModal() {
+    const modal = new bootstrap.Modal(document.getElementById('saveSearchModal'));
+    modal.show();
+}
+
+// Save current vehicle search
+function saveCurrentSearch() {
+    const searchName = document.getElementById('searchName').value.trim();
+    const searchDescription = document.getElementById('searchDescription').value.trim();
+    
+    if (!searchName) {
+        alert('Por favor, introduce un nombre para la búsqueda');
+        return;
+    }
+    
+    // Get all current search criteria from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchCriteria = {
+        search_text: '', // Vehicles don't have text search yet
+        location: '', // Will be stored in features if location_id exists
+        location_id: urlParams.get('location_id') || '',
+        min_price: urlParams.get('min_price') || '',
+        max_price: urlParams.get('max_price') || '',
+        // Vehicle-specific filters stored in features JSON
+        features: {
+            search_type: 'vehicle', // Mark this as a vehicle search
+            category: urlParams.get('category') || '',
+            make_id: urlParams.get('make_id') || '',
+            model_id: urlParams.get('model_id') || '',
+            min_year: urlParams.get('min_year') || '',
+            max_year: urlParams.get('max_year') || '',
+            fuel_type: urlParams.get('fuel_type') || '',
+            transmission: urlParams.get('transmission') || '',
+            max_mileage: urlParams.get('max_mileage') || '',
+            seller_type: urlParams.get('seller_type') || '',
+            condition: urlParams.get('condition') || '',
+            color: urlParams.get('color') || ''
+        }
+    };
+    
+    // Add location_id to features if provided
+    if (searchCriteria.location_id) {
+        searchCriteria.features.location_id = searchCriteria.location_id;
+    }
+    
+    // Send to backend
+    fetch('/api/save-search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            search_name: searchName,
+            search_criteria: searchCriteria
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Búsqueda guardada exitosamente');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('saveSearchModal'));
+            modal.hide();
+            // Clear form
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchDescription').value = '';
+        } else {
+            alert('Error al guardar la búsqueda: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar la búsqueda');
+    });
+}
+</script>
+{% endblock %}

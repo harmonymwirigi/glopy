@@ -1,0 +1,1016 @@
+/* --- GENERAL STYLES --- */
+body { 
+    background-color: #f8f9fa; 
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+body > .navbar, body > footer { display: none; }
+body > main { 
+    padding: 0; 
+    padding-bottom: 80px; 
+    background-color: #f8f9fa; 
+}
+
+/* --- SEARCH HEADER --- */
+.search-header-inmo {
+    background: linear-gradient(135deg, #0071c2, #00a5e5);
+    color: white;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.top-bar { 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    margin-bottom: 1rem;
+}
+
+.back-arrow-inmo { 
+    font-size: 1.5rem; 
+    color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.back-arrow-inmo:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.search-box-inmo { 
+    flex-grow: 1; 
+    position: relative;
+}
+
+.search-box-inmo .bi-search { 
+    position: absolute; 
+    left: 15px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #0071c2;
+}
+
+.search-box-inmo .form-control { 
+    border-radius: 25px; 
+    padding: 12px 20px 12px 45px;
+    background-color: white; 
+    border: none;
+    color: #333;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+}
+
+.search-box-inmo .form-control:focus {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+.map-button { 
+    color: white; 
+    text-decoration: none; 
+    text-align: center;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+.map-button:hover {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.map-button i { 
+    font-size: 1.2rem; 
+    margin-right: 6px;
+}
+
+.map-button span { 
+    font-size: 0.9rem; 
+    font-weight: 500;
+}
+
+/* --- FILTER PILLS --- */
+.filter-pills { 
+    display: flex; 
+    gap: 0.5rem; 
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.filter-pills::-webkit-scrollbar { 
+    display: none;
+}
+
+.btn-pill {
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 8px 16px;
+    transition: all 0.2s;
+}
+
+.btn-pill:hover {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.3);
+    color: white;
+}
+
+.btn-pill.active { 
+    background: white;
+    color: #0071c2;
+    border-color: white;
+}
+
+.btn-pill i { 
+    font-size: 1.1rem;
+}
+
+.remove-filter-btn i {
+    margin-left: 4px;
+    font-size: 1rem;
+}
+
+/* --- CONTENT SHEET --- */
+.content-sheet {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 24px 24px 0 0;
+    margin-top: -20px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+
+.listing-title-container {
+    margin-bottom: 2rem;
+}
+
+.listing-title-container h3 {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.listing-title-container p {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* --- VIEW CONTROLS --- */
+.view-controls {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.view-options .btn {
+    margin-right: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.view-options .btn:hover {
+    background-color: #f8f9fa;
+    border-color: #d0d0d0;
+    color: #333;
+}
+
+.view-options .btn.active {
+    background-color: #0071c2;
+    border-color: #0071c2;
+    color: white;
+}
+
+.view-options .btn i {
+    margin-right: 6px;
+}
+
+.sort-options .form-select {
+    border-radius: 8px;
+    font-size: 0.9rem;
+    min-width: 200px;
+    padding: 8px 12px;
+    border-color: #e0e0e0;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-options .form-select:hover {
+    border-color: #d0d0d0;
+}
+
+.sort-options .form-select:focus {
+    border-color: #0071c2;
+    box-shadow: 0 0 0 0.2rem rgba(0,113,194,0.25);
+}
+
+/* --- PROPERTY CARDS --- */
+.row {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 1.5rem !important;
+    padding: 0 0.5rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Override Bootstrap column styles */
+.row > .col {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Ensure listing cards maintain their layout */
+.listing-card {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Force grid layout after view changes */
+#announcementsContainer {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #4fc3f7;
+    display: flex;
+    justify-content: space-around;
+    padding: 0.75rem 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+    z-index: 1010;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+/* Special styling for inmobiliaria link */
+.nav-item[href="/inmobiliaria"] {
+    color: white;
+    font-weight: 500;
+}
+
+.nav-item[href="/inmobiliaria"] i {
+    font-size: 1.6rem;
+    color: white;
+}
+
+.nav-item[href="/inmobiliaria"]::after {
+    content: '';
+    position: absolute;
+    bottom: -0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: white;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.nav-item[href="/inmobiliaria"]:hover::after,
+.nav-item[href="/inmobiliaria"].active::after {
+    opacity: 1;
+}
+
+.nav-item i {
+    font-size: 1.4rem;
+}
+
+.nav-item.active {
+    color: white;
+    font-weight: 500;
+}
+
+.nav-item:hover {
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Adjust main content for bottom nav */
+.content-sheet {
+    margin-bottom: 70px;
+}
+
+/* Hide page icons */
+.page-icons {
+    display: none !important;
+}
+
+.listing-card {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.listing-image-container {
+    position: relative;
+    padding-top: 66.67%; /* 3:2 aspect ratio */
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.listing-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.listing-card:hover .listing-image-container img {
+    transform: scale(1.05);
+}
+
+.listing-details {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: white;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0071c2;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.price-per-m2 {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.location {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.location i {
+    color: #0071c2;
+    font-size: 0.9rem;
+}
+
+.specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    color: #666;
+    font-size: 0.85rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem 0;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.specs span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.specs i {
+    color: #0071c2;
+    font-size: 0.9rem;
+}
+
+/* Add icons for specs */
+.specs .rooms i { content: "\f236"; } /* bed */
+.specs .bathrooms i { content: "\f2cd"; } /* bath */
+.specs .area i { content: "\f047"; } /* arrows */
+
+/* --- PROPERTY FEATURES --- */
+.property-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: auto;
+}
+
+.feature-tag {
+    background: rgba(0,113,194,0.08);
+    color: #0071c2;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+}
+
+.feature-tag:hover {
+    background: rgba(0,113,194,0.12);
+}
+
+.feature-tag i {
+    font-size: 0.8rem;
+}
+
+/* --- SAVE BUTTON --- */
+.save-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(4px);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+.save-btn:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.save-btn i {
+    color: #666;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.save-btn.saved {
+    background: #e74c3c;
+}
+
+.save-btn.saved:hover {
+    background: #d44333;
+}
+
+.save-btn.saved i {
+    color: white;
+}
+
+/* Image counter */
+.image-counter {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+/* Carousel controls */
+.carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.carousel-inner {
+    height: 100%;
+}
+
+.carousel-item {
+    height: 100%;
+}
+
+.carousel-item img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.2s ease;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0 8px;
+}
+
+.carousel-control-prev { left: 4px; }
+.carousel-control-next { right: 4px; }
+
+.listing-image-container:hover .carousel-control-prev,
+.listing-image-container:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    background: rgba(0,0,0,0.7);
+    opacity: 1;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Carousel indicators */
+.carousel-indicators {
+    margin-bottom: 0.5rem;
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.5);
+    border: none;
+    margin: 0 4px;
+    transition: all 0.2s ease;
+}
+
+.carousel-indicators .active {
+    background-color: white;
+    transform: scale(1.2);
+}
+
+/* --- MAP VIEW --- */
+.map-container {
+    margin: 1rem;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    height: calc(100vh - 250px);
+    min-height: 500px;
+    position: relative;
+}
+
+#propertyMap {
+    width: 100%;
+    height: 100%;
+}
+
+/* Map popup styling */
+.leaflet-popup-content-wrapper {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    width: 280px !important;
+}
+
+.map-popup {
+    padding: 0;
+}
+
+.map-popup-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.map-popup-content {
+    padding: 1rem;
+}
+
+.map-popup h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.map-popup-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0071c2;
+    margin-bottom: 0.5rem;
+}
+
+.map-popup-details {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+}
+
+.map-popup-specs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.map-popup-specs span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.map-popup-specs i {
+    color: #0071c2;
+}
+
+.map-popup .btn {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    background: #0071c2;
+    border: none;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.map-popup .btn:hover {
+    background: #005999;
+}
+
+/* Map controls */
+.leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.leaflet-control-zoom a {
+    border-radius: 8px !important;
+    color: #1a1a1a !important;
+    transition: all 0.2s ease !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: #f0f0f0 !important;
+    color: #0071c2 !important;
+}
+
+/* Map markers */
+/* Custom marker styling */
+.custom-price-marker {
+    background: transparent !important;
+    border: none !important;
+    pointer-events: auto !important;
+}
+
+.custom-price-marker div {
+    pointer-events: auto !important;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    z-index: 1000;
+}
+
+.custom-price-marker:hover div,
+.leaflet-marker-icon:hover .custom-price-marker div {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 113, 194, 0.5);
+    z-index: 2000;
+}
+
+/* Ensure marker pane is above everything */
+.leaflet-marker-pane {
+    z-index: 600 !important;
+}
+
+.leaflet-popup-pane {
+    z-index: 700 !important;
+}
+
+.leaflet-marker-icon {
+    pointer-events: auto !important;
+    transition: transform 0.2s ease !important;
+    z-index: 600 !important;
+    cursor: pointer !important;
+}
+
+.leaflet-marker-icon:hover {
+    transform: scale(1.1) !important;
+    z-index: 2000 !important;
+}
+
+/* Ensure markers stay visible and clickable */
+.leaflet-interactive {
+    pointer-events: auto !important;
+}
+
+.leaflet-marker-pane img,
+.leaflet-marker-pane svg,
+.leaflet-marker-pane div {
+    pointer-events: auto !important;
+}
+
+/* Fix for marker disappearing */
+.leaflet-div-icon {
+    border: none !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+}
+
+/* Prevent marker shadow from blocking clicks */
+.leaflet-marker-shadow {
+    pointer-events: none !important;
+}
+
+/* Map view button */
+.view-btn[data-view="map"] {
+    position: relative;
+}
+
+.view-btn[data-view="map"].active {
+    background: #0071c2;
+    color: white;
+}
+
+/* Responsive map */
+@media (max-width: 768px) {
+    .map-container {
+        height: calc(100vh - 200px);
+        margin: 0.5rem;
+    }
+
+    .map-popup-content {
+        padding: 0.75rem;
+    }
+
+    .map-popup h6 {
+        font-size: 0.95rem;
+    }
+
+    .map-popup-image {
+        height: 140px;
+    }
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 768px) {
+    .search-header-inmo {
+        padding: 0.75rem;
+    }
+
+    .search-box-inmo .form-control {
+        padding: 10px 16px 10px 40px;
+        font-size: 0.95rem;
+    }
+
+    .map-button span {
+        display: none;
+    }
+
+    .view-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .view-options, .sort-options {
+        width: 100%;
+    }
+
+    .sort-options .form-select {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .listing-image-container {
+        height: 200px;
+    }
+
+    .price {
+        font-size: 1.3rem;
+    }
+
+    .title {
+        font-size: 1rem;
+    }
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.listing-card {
+    animation: fadeIn 0.3s ease;
+}
+
+/* --- ACCESSIBILITY --- */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.btn:focus,
+.form-control:focus,
+.save-btn:focus {
+    outline: 2px solid #0071c2;
+    outline-offset: 2px;
+}
+
+/* --- MAP VIEW --- */
+.map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+
+.map-popup {
+    min-width: 200px;
+    padding: 0.5rem;
+}
+
+.map-popup h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+}
+
+.map-popup p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.map-popup .btn {
+    margin-top: 0.75rem;
+    width: 100%;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+/* --- NOTIFICATIONS --- */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 1050;
+    max-width: 350px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification i {
+    font-size: 1.2rem;
+    color: #0071c2;
+}
+
+.notification.success i {
+    color: #28a745;
+}
+
+.notification.error i {
+    color: #dc3545;
+}
+
+/* Hide Glopy chat bubble */
+.fab-container {
+    display: none !important;
+}
+
+/* --- LOADING STATES --- */
+.listing-card.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.listing-card.loading::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.4) 50%,
+        rgba(255,255,255,0) 100%
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}

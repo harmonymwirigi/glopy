@@ -1,0 +1,307 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-overview {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .stat-box {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+    
+    .ad-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .ad-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .ad-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #f8f9fa;
+    }
+    
+    .company-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.5rem;
+    }
+    
+    .badge-active { background: #28a745; }
+    .badge-paused { background: #ffc107; color: #000; }
+    .badge-expired { background: #dc3545; }
+    .badge-pending { background: #6c757d; }
+    
+    .filter-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-megaphone-fill"></i> Anuncios Comerciales
+                </h1>
+                <p class="mb-0 opacity-75">Gestiona los anuncios patrocinados de empresas</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_create_commercial_ad') }}" class="btn btn-light me-2">
+                    <i class="bi bi-plus-circle"></i> Crear Anuncio
+                </a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-number">{{ total_active }}</div>
+                    <div class="stat-label">Anuncios Activos</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-number">{{ "{:,.0f}".format(total_views) }}</div>
+                    <div class="stat-label">Visualizaciones Totales</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="stat-number">{{ "{:,.0f}".format(total_clicks) }}</div>
+                    <div class="stat-label">Clics Totales</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('admin_commercial_ads') }}" class="row align-items-center">
+            <div class="col-md-3">
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los estados</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Activos</option>
+                    <option value="paused" {% if status == 'paused' %}selected{% endif %}>Pausados</option>
+                    <option value="expired" {% if status == 'expired' %}selected{% endif %}>Expirados</option>
+                    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pendientes</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin_commercial_ads') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Commercial Ads List -->
+    <div class="row">
+        {% if ads.items %}
+            {% for ad in ads.items %}
+            <div class="col-12">
+                <div class="ad-card">
+                    <div class="row align-items-center">
+                        <!-- Ad Image -->
+                        <div class="col-md-1">
+                            {% if ad.image_url %}
+                            <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="ad-image">
+                            {% else %}
+                            <div class="ad-image d-flex align-items-center justify-content-center">
+                                <i class="bi bi-image" style="font-size: 2rem; color: #ccc;"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Ad Info -->
+                        <div class="col-md-4">
+                            <h5 class="mb-1">{{ ad.title }}</h5>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if ad.company_logo %}
+                                <img src="{{ ad.company_logo }}" alt="{{ ad.company_name }}" class="company-logo">
+                                {% endif %}
+                                <small class="text-muted">{{ ad.company_name }}</small>
+                            </div>
+                            <span class="badge badge-{{ ad.status }}">{{ ad.status|upper }}</span>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-eye"></i> {{ ad.views_count }} vistas | 
+                                <i class="bi bi-mouse"></i> {{ ad.clicks_count }} clics
+                            </small>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-graph-up"></i> CTR: {{ "%.2f"|format(ad.get_ctr()) }}%
+                            </small>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar-range"></i> 
+                                {{ ad.start_date.strftime('%d/%m/%Y') }} - {{ ad.end_date.strftime('%d/%m/%Y') }}
+                            </small>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('admin_commercial_ad_stats', ad_id=ad.id) }}" class="btn btn-sm btn-info" title="Estadísticas">
+                                <i class="bi bi-graph-up"></i>
+                            </a>
+                            <a href="{{ url_for('admin_edit_commercial_ad', ad_id=ad.id) }}" class="btn btn-sm btn-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button onclick="toggleStatus({{ ad.id }})" class="btn btn-sm btn-warning" title="Pausar/Activar">
+                                <i class="bi bi-pause-circle"></i>
+                            </button>
+                            <button onclick="deleteAd({{ ad.id }})" class="btn btn-sm btn-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if ads.pages > 1 %}
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if ads.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin_commercial_ads', page=ads.prev_num, status=status) }}">Anterior</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for page_num in ads.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                            {% if page_num %}
+                                {% if page_num == ads.page %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin_commercial_ads', page=page_num, status=status) }}">{{ page_num }}</a></li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if ads.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin_commercial_ads', page=ads.next_num, status=status) }}">Siguiente</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> No hay anuncios comerciales registrados.
+                    <a href="{{ url_for('admin_create_commercial_ad') }}" class="alert-link">Crear el primero</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleStatus(adId) {
+    if (!confirm('¿Cambiar el estado de este anuncio?')) return;
+    
+    fetch(`/admin/commercial-ads/${adId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error al cambiar el estado');
+        console.error(error);
+    });
+}
+
+function deleteAd(adId) {
+    if (!confirm('¿Estás seguro de eliminar este anuncio comercial? Esta acción no se puede deshacer.')) return;
+    
+    fetch(`/admin/commercial-ads/${adId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error al eliminar el anuncio');
+        console.error(error);
+    });
+}
+</script>
+{% endblock %}
+

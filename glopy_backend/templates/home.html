@@ -1,0 +1,417 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+    {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Admin Panel Styles */
+    .admin-panel-section {
+        margin-top: 1.5rem;
+    }
+    
+    .admin-panel-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .admin-panel-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .admin-panel-content {
+        display: flex;
+        align-items: center;
+        color: white;
+    }
+    
+    .admin-panel-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .admin-panel-text {
+        flex: 1;
+    }
+    
+    .admin-panel-text h5 {
+        margin: 0 0 0.25rem 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .admin-panel-text p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+    
+    .admin-panel-btn {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+    }
+    
+    .admin-panel-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        text-decoration: none;
+        transform: scale(1.1);
+    }
+    
+    /* Coming Soon Styles */
+    .recent-search-card-wrapper {
+        position: relative;
+    }
+    
+    .coming-soon-card {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .coming-soon-card:hover {
+        transform: scale(1.05);
+    }
+    
+    .coming-soon-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        z-index: 2;
+    }
+    
+    .coming-soon-content {
+        text-align: center;
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .coming-soon-content i {
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+    }
+    
+    .coming-soon-content span {
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .category-title {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        backdrop-filter: blur(4px);
+    }
+    
+    .recent-search-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .recent-search-card img {
+        filter: brightness(1);
+        transition: filter 0.3s ease;
+    }
+    
+    .coming-soon-card img {
+        filter: brightness(0.7) blur(1px);
+    }
+  </style>
+{% endblock %}
+
+
+{% block content %}
+<div class="home-container">
+    
+    <!-- Sección Superior (Hero) -->
+    <div class="home-hero">
+        <img src="{{ url_for('static', filename='Animaciones_Glopy/Accion_espera_Glopy_GIF.gif') }}" alt="Glopy Mascot" class="home-mascot">
+
+        <div class="home-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="Valencia">
+            <i class="bi bi-geo-alt-fill location-icon"></i>
+        </div>
+
+        <button class="btn btn-buscar">Buscar</button>
+    </div>
+    
+    <!-- Hoja de Contenido Inferior -->
+    <div class="home-content-sheet">
+        {% if session.user_id %}
+        <!-- Personalized Dashboard for Logged Users -->
+        <div class="user-dashboard-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="bi bi-person-circle me-2"></i>
+                    ¡Hola, {{ current_user.name or 'Usuario' }}!
+                    {% if current_user.is_verified %}
+                      <i class="bi bi-patch-check-fill text-warning ms-1 verified-badge" title="Usuario verificado"></i>
+                    {% endif %}
+                </h3>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="user-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h4>{{ saved_ads_count or 0 }}</h4>
+                        <p>Guardados</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-bookmark-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h4>{{ saved_searches_count or 0 }}</h4>
+                        <p>Búsquedas</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h4>{{ email_alerts_enabled and 'ON' or 'OFF' }}</h4>
+                        <p>Alertas</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="home-quick-actions">
+                <a href="{{ url_for('create_ad') }}" class="home-action-btn primary">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Crear Anuncio</span>
+                </a>
+                <a href="{{ url_for('my_ads') }}" class="home-action-btn secondary">
+                    <i class="bi bi-house-door"></i>
+                    <span>Mis Anuncios</span>
+                </a>
+                <a href="{{ url_for('cargando') }}" class="home-action-btn tertiary">
+                    <i class="bi bi-heart"></i>
+                    <span>Ver Guardados</span>
+                </a>
+                <a href="{{ url_for('glopy_assistant') }}" class="home-action-btn quaternary">
+                    <i class="bi bi-robot"></i>
+                    <span>Glopy Assistant</span>
+                </a>
+                <a href="{{ url_for('profile') }}" class="home-action-btn quinary">
+                    <i class="bi bi-person"></i>
+                    <span>Mi Perfil</span>
+                </a>
+            </div>
+            
+            <!-- Admin Panel Button for Admin Users -->
+            {% if session.user_id and is_admin %}
+            <div class="admin-panel-section">
+                <div class="admin-panel-card">
+                    <div class="admin-panel-content">
+                        <div class="admin-panel-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="admin-panel-text">
+                            <h5>Panel de Administración</h5>
+                            <p>Gestiona usuarios, anuncios y configuraciones</p>
+                        </div>
+                        <a href="{{ url_for('admin_dashboard') }}" class="admin-panel-btn">
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Búsquedas Recientes -->
+        <div class="section-container">
+            <div class="section-header">
+                <h3 class="section-title">
+                    {% if session.user_id %}Explora categorías{% else %}Búsquedas recientes{% endif %}
+                </h3>
+                <a href="{{ url_for('inmobiliaria') }}" class="section-link">Ver todas</a>
+            </div>
+            <div class="row row-cols-3 g-2">
+                {% for busqueda in busquedas %}
+                <div class="col">
+                    <div class="recent-search-card-wrapper {% if busqueda.coming_soon %}coming-soon{% endif %}">
+                        {% if busqueda.coming_soon %}
+                        <div class="recent-search-card coming-soon-card" onclick="showComingSoonAlert('{{ busqueda.title }}')">
+                            <img src="{{ url_for('static', filename='images/' + busqueda.imagen) }}" alt="{{ busqueda.title }}">
+                            <div class="coming-soon-overlay">
+                                <div class="coming-soon-content">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Próximamente</span>
+                                </div>
+                            </div>
+                            <div class="category-title">{{ busqueda.title }}</div>
+                        </div>
+                        {% else %}
+                        <a href="{{ busqueda.route }}">
+                            <div class="recent-search-card">
+                                <img src="{{ url_for('static', filename='images/' + busqueda.imagen) }}" alt="{{ busqueda.title }}">
+                                <div class="category-title">{{ busqueda.title }}</div>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Valoraciones -->
+        <div class="section-container mt-4">
+            <h3 class="section-title">Valoraciones</h3>
+            <div class="valoraciones-section">
+                {% for valoracion in valoraciones %}
+                <div class="valoracion-card">
+                    <img src="{{ url_for('static', filename=valoracion.imagen) }}" alt="{{ valoracion.nombre }}">
+                    <div class="valoracion-info">
+                        <h6>{{ valoracion.nombre }}</h6>
+                        <p>"{{ valoracion.testimonio }}"</p>
+                        {% if valoracion.rating %}
+                        <div class="valoracion-rating">
+                            <i class="bi bi-star-fill"></i> {{ valoracion.rating }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de navegación inferior -->
+{% include 'bottom_nav.html' %}
+
+<script>
+function showComingSoonAlert(categoryName) {
+    // Create a custom alert with better styling
+    const alertHtml = `
+        <div id="comingSoonModal" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        ">
+            <div style="
+                background: white;
+                padding: 2rem;
+                border-radius: 16px;
+                text-align: center;
+                max-width: 300px;
+                margin: 1rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            ">
+                <div style="
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 1rem;
+                    color: white;
+                    font-size: 1.5rem;
+                ">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #333; font-weight: 600;">Próximamente</h4>
+                <p style="margin: 0 0 1.5rem 0; color: #666; line-height: 1.4;">
+                    La categoría <strong>${categoryName}</strong> estará disponible muy pronto. 
+                    ¡Mantente atento a las actualizaciones!
+                </p>
+                <button onclick="closeComingSoonAlert()" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.2s ease;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', alertHtml);
+}
+
+function closeComingSoonAlert() {
+    const modal = document.getElementById('comingSoonModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'comingSoonModal') {
+        closeComingSoonAlert();
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,303 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .category-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .add-category-card {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .add-category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    .stats-badge {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-tags"></i> Gestión de Categorías
+                </h1>
+                <p class="mb-0 opacity-75">Administra las categorías de propiedades</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item active">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Add Category Card -->
+            <div class="add-category-card" onclick="showAddCategoryModal()">
+                <i class="bi bi-plus-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <h4>Agregar Nueva Categoría</h4>
+                <p class="mb-0">Crea una nueva categoría de propiedades</p>
+            </div>
+            
+            <!-- Categories Grid -->
+            <div class="row">
+                {% for category in categories %}
+                <div class="col-md-6 mb-3">
+                    <div class="category-card">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="category-icon">
+                                    <i class="bi bi-house"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1">{{ category.name }}</h5>
+                                <p class="text-muted mb-2">{{ category.description or 'Sin descripción' }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="stats-badge">
+                                        <i class="bi bi-house-door"></i> 
+                                        {{ category.announcements|length }} anuncios
+                                    </span>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="editCategory({{ category.id }})">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="deleteCategory({{ category.id }}, '{{ category.name }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not categories %}
+            <div class="text-center py-5">
+                <i class="bi bi-tags" style="font-size: 4rem; color: #dee2e6;"></i>
+                <h4 class="text-muted mt-3">No hay categorías</h4>
+                <p class="text-muted">Agrega la primera categoría para comenzar</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">
+                    <i class="bi bi-tags"></i> <span id="modalTitle">Agregar Categoría</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Nombre de la Categoría</label>
+                        <input type="text" class="form-control" id="categoryName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryDescription" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveCategory()">
+                    <i class="bi bi-check-circle"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let editingCategoryId = null;
+
+function showAddCategoryModal() {
+    editingCategoryId = null;
+    document.getElementById('modalTitle').textContent = 'Agregar Categoría';
+    document.getElementById('categoryForm').reset();
+    new bootstrap.Modal(document.getElementById('categoryModal')).show();
+}
+
+function editCategory(categoryId) {
+    editingCategoryId = categoryId;
+    document.getElementById('modalTitle').textContent = 'Editar Categoría';
+    
+    // In a real implementation, you would fetch the category data
+    // For now, we'll just show the modal
+    new bootstrap.Modal(document.getElementById('categoryModal')).show();
+}
+
+function saveCategory() {
+    const form = document.getElementById('categoryForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        name: formData.get('name'),
+        description: formData.get('description')
+    };
+    
+    if (!data.name.trim()) {
+        showNotification('El nombre de la categoría es obligatorio', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('#categoryModal .btn-primary');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Guardando...';
+    saveBtn.disabled = true;
+    
+    // In a real implementation, you would make an API call here
+    // For now, we'll just show a success message
+    setTimeout(() => {
+        showNotification('Categoría guardada exitosamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        // In a real implementation, you would reload the page or update the UI
+    }, 1000);
+}
+
+function deleteCategory(categoryId, categoryName) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar la categoría "${categoryName}"?`)) {
+        return;
+    }
+    
+    // In a real implementation, you would make an API call here
+    showNotification('Categoría eliminada exitosamente', 'success');
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

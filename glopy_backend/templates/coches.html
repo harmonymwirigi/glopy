@@ -1,0 +1,22 @@
+﻿{% extends "base2.html" %}
+
+{% block content %}
+<h2 class="mb-4">Coches</h2>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for anuncio in sector.anuncios %}
+    <div class="col">
+        <div class="card anuncio-card h-100">
+            <img src="{{ anuncio.imagen }}" class="card-img-top" alt="{{ anuncio.titulo }}">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ anuncio.titulo }}</h5>
+                <p class="card-text">{{ anuncio.descripcion }}</p>
+                <p class="card-text"><strong>Precio:</strong> {{ anuncio.precio }}</p>
+                <!-- Puedes aÃ±adir botones o enlaces adicionales aquÃ­ -->
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<a href="/" class="btn btn-secondary mt-4">Volver al inicio</a>
+{% endblock %}
+

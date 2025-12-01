@@ -1,0 +1,28 @@
+/* Estilos globales para toda la web */
+.sector-card, .anuncio-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.sector-card:hover, .anuncio-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+}
+
+/* Para que el contenido no quede pegado a la navbar o al footer */
+main {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    min-height: calc(100vh - 150px); /* Ajusta este valor si tu nav/footer cambian de tamaño */
+}

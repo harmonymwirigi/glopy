@@ -1,0 +1,12 @@
+HECHO 
+
+
+
+RESTANTE
+- En pc también se abre solo la categoria de inmobiliaria y después de clicar se queda la pantalla difusa en negro
+- Panel admin
+- Algún scraper
+- Mejorar algo de la bdd de inmobiliaria
+- BDD de coches
+- Campo de url para ir a la plataforma original
+- ia de reconocimiento de fotos para no repetir anuncios (gana el anuncio de la plataforma que tenga más info)

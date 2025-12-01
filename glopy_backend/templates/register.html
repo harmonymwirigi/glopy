@@ -1,0 +1,243 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container-register">
+  
+  <!-- Cabecera azul curvada -->
+  <div class="register-header">
+      <a href="{{ url_for('login') }}" class="back-arrow-auth">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+  </div>
+  
+  <!-- "Hoja" blanca con el formulario -->
+  <div class="register-form-sheet">
+    <div class="register-form-container">
+      
+      <!-- Contenedor del Título y la Mascota -->
+      <div class="register-title-container">
+        <h2>
+            Regístrate
+            <img src="{{ url_for('static', filename='Animaciones_Glopy/Accion_espera_Glopy_GIF.gif') }}" alt="Glopy Mascot" class="mascot-register">
+        </h2>
+      </div>
+      
+      <p class="subtitle-text">¿Ya estás registrado? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+
+      <!-- Invitation Message -->
+      <div id="invitation-message" class="alert alert-info d-none" role="alert">
+        <i class="bi bi-gift"></i> ¡Has sido invitado a Glopy! Completa tu registro para que tu amigo gane puntos.
+      </div>
+
+      <!-- Mensajes inline -->
+      <div id="register-message" class="alert d-none" role="alert"></div>
+
+      <!-- OAuth Registration Buttons -->
+      <div class="oauth-buttons-register mb-4">
+        <a href="{{ url_for('oauth.login_google') }}" class="btn btn-oauth-register btn-google-register w-100 mb-2">
+          <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Registrarse con Google
+        </a>
+        
+        <a href="{{ url_for('oauth.login_facebook') }}" class="btn btn-oauth-register btn-facebook-register w-100 mb-2">
+          <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Registrarse con Facebook
+        </a>
+        
+        <a href="{{ url_for('oauth.login_microsoft') }}" class="btn btn-oauth-register btn-microsoft-register w-100 mb-3">
+          <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#f25022" d="M0 0h11.377v11.372H0z"/>
+            <path fill="#00a4ef" d="M12.623 0H24v11.372H12.623z"/>
+            <path fill="#7fba00" d="M0 12.628h11.377V24H0z"/>
+            <path fill="#ffb900" d="M12.623 12.628H24V24H12.623z"/>
+          </svg>
+          Registrarse con Microsoft
+        </a>
+      </div>
+      
+      <div class="divider-register mb-4">
+        <span>o registrarse con email</span>
+      </div>
+
+      <form action="{{ url_for('home') }}" method="GET" class="w-100" enctype="multipart/form-data">
+          <div class="form-group-auth mb-3">
+              <label for="name" class="form-label">NOMBRE</label>
+              <input type="text" class="form-control" id="name" placeholder="Vanesa Lopez" required>
+          </div>
+          <div class="form-group-auth mb-3">
+              <label for="email" class="form-label">EMAIL</label>
+              <input type="email" class="form-control" id="email" placeholder="hello@gmail.com" required>
+          </div>
+          <div class="form-group-auth mb-3">
+              <label for="password" class="form-label">CONTRASEÑA</label>
+              <input type="password" class="form-control" id="password" placeholder="********" required>
+          </div>
+          <div class="form-group-auth mb-4">
+              <label for="birthdate" class="form-label">FECHA DE NACIMIENTO</label>
+              <select class="form-select" id="birthdate">
+                  <option selected>Seleccionar</option>
+                  <option value="1">...</option>
+              </select>
+          </div>
+          
+          <!-- Company Registration Section -->
+          <div class="form-group-auth mb-3">
+              <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="isCompany" onchange="toggleCompanyFields()">
+                  <label class="form-check-label" for="isCompany">
+                      <strong>Registrarme como empresa</strong>
+                  </label>
+              </div>
+          </div>
+          
+          <!-- Company Fields (Hidden by default) -->
+          <div id="companyFields" style="display: none;">
+              <div class="form-group-auth mb-3">
+                  <label for="cif" class="form-label">CIF/NIF *</label>
+                  <input type="text" class="form-control" id="cif" placeholder="A12345678" maxlength="20">
+                  <div class="form-text">Código de identificación fiscal de la empresa</div>
+              </div>
+              <div class="form-group-auth mb-3">
+                  <label for="companyLogo" class="form-label">LOGO DE LA EMPRESA</label>
+                  <input type="file" class="form-control" id="companyLogo" accept="image/*">
+                  <div class="form-text">Opcional: Sube el logo de tu empresa</div>
+              </div>
+          </div>
+          
+          <button id="register-submit" type="submit" class="btn btn-auth-dark w-100">ENTRAR</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block title %}{% endblock %}
+{% block scripts %}
+<script>
+  (function() {
+    const form = document.querySelector('.register-form-container form');
+    const msgEl = document.getElementById('register-message');
+    const invitationMsgEl = document.getElementById('invitation-message');
+    const submitBtn = document.getElementById('register-submit');
+    
+    // Check for invitation code in URL or session
+    const urlParams = new URLSearchParams(window.location.search);
+    const invitationCode = urlParams.get('ref') || urlParams.get('invitation_code');
+    
+    if (invitationCode) {
+      // Show invitation message
+      if (invitationMsgEl) {
+        invitationMsgEl.classList.remove('d-none');
+      }
+    }
+    
+    // Toggle company fields function
+    window.toggleCompanyFields = function() {
+      const isCompany = document.getElementById('isCompany').checked;
+      const companyFields = document.getElementById('companyFields');
+      const cifField = document.getElementById('cif');
+      
+      if (isCompany) {
+        companyFields.style.display = 'block';
+        cifField.required = true;
+      } else {
+        companyFields.style.display = 'none';
+        cifField.required = false;
+        cifField.value = '';
+        document.getElementById('companyLogo').value = '';
+      }
+    }
+    
+    function showMsg(text, variant) {
+      if (!msgEl) return;
+      msgEl.innerHTML = text || '';
+      msgEl.className = 'alert ' + (variant ? ('alert-' + variant) : 'alert-info');
+      msgEl.classList.remove('d-none');
+      msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = (document.getElementById('name')?.value || '').trim();
+      const email = (document.getElementById('email')?.value || '').trim();
+      const password = document.getElementById('password')?.value || '';
+      const isCompany = document.getElementById('isCompany')?.checked || false;
+      const cif = (document.getElementById('cif')?.value || '').trim();
+      const originalText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Enviando…'; }
+      try {
+        // Create FormData for file upload support
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('is_company', isCompany);
+        
+        // Add CIF if company registration
+        if (isCompany && cif) {
+          formData.append('cif', cif);
+        }
+        
+        // Add logo file if company registration
+        const logoFile = document.getElementById('companyLogo')?.files[0];
+        if (isCompany && logoFile) {
+          formData.append('company_logo', logoFile);
+        }
+        
+        // Add invitation code if present
+        if (invitationCode) {
+          formData.append('invitation_code', invitationCode);
+        }
+        
+        const res = await fetch("{{ url_for('auth_register') }}", {
+          method: 'POST',
+          body: formData
+        });
+        const ct = res.headers.get('content-type') || '';
+        if (res.ok) {
+          if (ct.includes('application/json')) {
+            await res.json().catch(()=>({}));
+          } else {
+            await res.text().catch(()=>{});
+          }
+          const loginLink = `<a href="{{ url_for('login') }}" class="alert-link">Ir a iniciar sesión</a>`;
+          let messageHtml = `Te hemos enviado un email de verificación. Revisa tu bandeja y spam. Cuando confirmes, podrás iniciar sesión. ${loginLink}`;
+          
+          if (invitationCode) {
+            messageHtml = `¡Registro exitoso! Te hemos enviado un email de verificación. Revisa tu bandeja y spam. Cuando confirmes, tu amigo ganará puntos Glopy. ${loginLink}`;
+          }
+          
+          showMsg(messageHtml, 'success');
+        } else {
+          if (ct.includes('application/json')) {
+            const data = await res.json();
+            showMsg(data.message || 'No se pudo registrar', 'danger');
+          } else {
+            const text = await res.text();
+            showMsg(text.replace(/<[^>]+>/g,'') || 'No se pudo registrar', 'danger');
+          }
+        }
+      } catch (err) {
+        showMsg('Error de red', 'danger');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText || 'ENTRAR'; }
+      }
+    });
+  })();
+</script>
+{% endblock %}
+

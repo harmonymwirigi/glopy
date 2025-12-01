@@ -1,0 +1,445 @@
+
+/* Estilos para el Login */
+/* --- ESTILOS GENERALES Y RESET --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Oculta la navbar y footer por defecto de base.html en esta página */
+body > .navbar,
+body > footer {
+    display: none;
+}
+/* Asegura que nuestro contenedor principal ocupe toda la página */
+body > main {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 100vh;
+}
+
+/* --- CONTENEDOR PRINCIPAL DE AUTENTICACIÓN --- */
+.auth-container {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centra el contenido verticalmente */
+    padding: 2rem 1.5rem;
+    position: relative;
+    overflow: hidden; /* Evita que las burbujas se salgan */
+    color: white;
+
+    /* Fondo con dos capas: imagen de burbujas y degradado */
+    background-image: url(../burbujas.png), linear-gradient(71deg, #34abe963 0%, #2060c1 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: top 10% right 20%, 0 0;
+    background-size: 110%, 100% 100%;
+}
+
+
+/* --- ICONOS DE NAVEGACIÓN SUPERIOR --- */
+.auth-top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem;
+}
+
+.auth-icon-btn {
+    color: white;
+    font-size: 1.2rem;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* --- CAJA DE CONTENIDO CENTRAL --- */
+.auth-box {
+    text-align: center;
+    width: 100%;
+    max-width: 350px; /* Ancho máximo del contenido */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Apila los elementos verticalmente */
+    align-items: center;   /* Centra los elementos horizontalmente */
+}
+
+.auth-header .mascot {
+    width: 110px;
+    height: 110px;
+}
+
+.auth-header .logo-glopy {
+    max-width: 130px; /* Ajusta el tamaño del logo */
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+
+/* --- FORMULARIO Y SUS ELEMENTOS --- */
+.form-group-auth {
+    text-align: left;
+}
+
+.form-group-auth .form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+}
+
+.form-group-auth .form-control {
+    background-color: #fff;
+    border: none;
+    border-radius: 50px; /* Bordes muy redondeados para el efecto "píldora" */
+    padding: 14px 24px;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-auth-primary {
+    background-color: #74afd8; 
+    color: #ffffff; 
+    border: none;
+    border-radius: 50px;
+    padding: 14px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+}
+
+.btn-auth-primary:hover {
+    background-color: #81f1fc;
+}
+
+
+/* --- PIE DE PÁGINA DEL LOGIN --- */
+.auth-footer {
+    margin-top: 2.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem; /* Espacio entre los enlaces */
+}
+
+.auth-footer a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+}
+
+/* Estilos para el Registro */
+.auth-container-register {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.register-header {
+    width: 100%;
+    height: 135px;
+    background-image: url('../burbujas.png'), linear-gradient(150deg, #34d5e9 0%, #2086c1 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: top 20% right -20%, 0 0;
+    background-size: 60%, 100% 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.back-arrow-auth {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    color: white;
+    font-size: 1.2rem;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.register-form-sheet {
+    background: #fff;
+    border-top-right-radius: 60px;
+    flex-grow: 1;
+    margin-top: -40px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.register-form-container {
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* --- ¡AQUÍ ESTÁ LA NUEVA LÓGICA! --- */
+.register-title-container h2 {
+    font-weight: 700;
+    font-size: 2rem;
+    color: #333;
+    margin: 0;
+    /* Usamos flexbox para alinear el texto y la imagen interna */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mascot-register {
+    /* Ya no necesita posicionamiento, es parte del flujo del h2 */
+    width: 50px;
+    height: 50px;
+}
+/* --- FIN DE LA NUEVA LÓGICA --- */
+
+
+.register-form-container .subtitle-text {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-top: 0.5rem; /* Margen superior para separarlo del título */
+    margin-bottom: 2.5rem;
+}
+.register-form-container .subtitle-text a {
+    color: #0083B0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.register-form-container .form-group-auth .form-label {
+    color: #888;
+}
+.register-form-container .form-group-auth .form-control,
+.register-form-container .form-group-auth .form-select {
+    background-color: #63E6F230;
+    border: none;
+    border-radius: 15px;
+    padding: 14px 20px;
+    color: #333;
+    font-weight: 500;
+}
+
+.register-form-container .form-group-auth .form-control::placeholder {
+    color: #555;
+    opacity: 0.8;
+}
+
+.register-form-container .form-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px 12px;
+}
+
+.btn-auth-dark {
+    background-color: #263238;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 14px;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* --- OAUTH BUTTONS --- */
+.oauth-buttons {
+    width: 100%;
+}
+
+.btn-oauth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.btn-oauth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    text-decoration: none;
+}
+
+.oauth-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.btn-google {
+    background-color: #ffffff;
+    color: #3c4043;
+}
+
+.btn-google:hover {
+    background-color: #f8f9fa;
+    color: #3c4043;
+}
+
+.btn-facebook {
+    background-color: #1877F2;
+    color: #ffffff;
+}
+
+.btn-facebook:hover {
+    background-color: #166FE5;
+    color: #ffffff;
+}
+
+.btn-microsoft {
+    background-color: #ffffff;
+    color: #5e5e5e;
+}
+
+.btn-microsoft:hover {
+    background-color: #f3f3f3;
+    color: #5e5e5e;
+}
+
+/* Divider between OAuth and email login */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.divider span {
+    padding: 0 15px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* --- OAUTH BUTTONS FOR REGISTER PAGE --- */
+.oauth-buttons-register {
+    width: 100%;
+}
+
+.btn-oauth-register {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-radius: 15px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.btn-oauth-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+}
+
+.btn-google-register {
+    background-color: #ffffff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+}
+
+.btn-google-register:hover {
+    background-color: #f8f9fa;
+    color: #3c4043;
+}
+
+.btn-facebook-register {
+    background-color: #1877F2;
+    color: #ffffff;
+}
+
+.btn-facebook-register:hover {
+    background-color: #166FE5;
+    color: #ffffff;
+}
+
+.btn-microsoft-register {
+    background-color: #ffffff;
+    color: #5e5e5e;
+    border: 1px solid #dadce0;
+}
+
+.btn-microsoft-register:hover {
+    background-color: #f3f3f3;
+    color: #5e5e5e;
+}
+
+/* Divider for register page */
+.divider-register {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.divider-register::before,
+.divider-register::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.divider-register span {
+    padding: 0 15px;
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+

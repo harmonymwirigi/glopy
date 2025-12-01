@@ -1,0 +1,49 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/extra_pages.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+<div class="full-page-container search-page">
+    
+    <!-- Contenedor de la cabecera con logo y mascota -->
+    <div class="search-page-header">
+        <img src="{{ url_for('static', filename='LOGOS/Logo_Tipografia.png') }}" alt="Glopy Logo" class="header-logo">
+        <!-- Barra de Búsqueda (ahora integrada en el header) -->
+        <div class="header-search">
+          <div class="main-search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" class="form-control" placeholder="Búsqueda">
+              <div class="search-icons-right">
+                  <img src="{{ url_for('static', filename='ICONOS/ICONO3.png') }}" alt="Buscar por imagen">
+                  <img src="{{ url_for('static', filename='ICONOS/ICONO4.png') }}" alt="Búsqueda por voz">
+              </div>
+          </div>
+        </div>
+        <img src="{{ url_for('static', filename='Animaciones_Glopy/Accion_espera_Glopy_GIF.gif') }}" alt="Glopy Mascot" class="header-mascot">
+    </div>
+    
+    <!-- Slogan -->
+    <p class="slogan-text">Lo que necesitas en un<br>solo <strong>clic</strong></p>
+    
+    <!-- Contenedor de las imágenes de categorías-->
+    <div class="category-images-container">
+        <a href="{{ url_for('inmobiliaria') }}" class="category-image-link house-image">
+            <img src="{{ url_for('static', filename='ICONOS/ICONO5.png') }}" alt="Inmobiliaria">
+        </a>
+        <a href="{{ url_for('coches') }}" class="category-image-link car-image">
+            <img src="{{ url_for('static', filename='ICONOS/ICONO6.png') }}" alt="Coches">
+        </a>
+    </div>
+    
+</div>
+
+<!-- Barra de navegación inferior -->
+{% include 'bottom_nav.html' %}
+{% endblock %}
+

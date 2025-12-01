@@ -1,0 +1,281 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .ad-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .ad-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .ad-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #f8f9fa;
+    }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .search-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        border-color: #bd2130;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-house-door"></i> Gestión de Anuncios
+                </h1>
+                <p class="mb-0 opacity-75">Administra todos los anuncios del sistema</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item active">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Search Box -->
+            <div class="search-box">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Buscar por título..." 
+                               value="{{ search }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Ads List -->
+            {% for ad in ads.items %}
+            <div class="ad-card">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <img src="{{ url_for('static', filename='uploads/announcements/' + ad.id|string + '_0_placeholder.jpg') }}" 
+                             alt="Ad Image" class="ad-image" 
+                             onerror="this.src='{{ url_for('static', filename='images/placeholder-house.jpg') }}'">
+                    </div>
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="mb-1">{{ ad.title }}</h5>
+                                <p class="text-muted mb-1">{{ ad.description[:100] }}{% if ad.description|length > 100 %}...{% endif %}</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-primary">€{{ "%.0f"|format(ad.price) }}</span>
+                                    {% if ad.rooms %}
+                                    <span class="badge bg-secondary">{{ ad.rooms }} habitaciones</span>
+                                    {% endif %}
+                                    {% if ad.square_meters %}
+                                    <span class="badge bg-info">{{ ad.square_meters }}m²</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-muted mb-2">
+                                    <small>
+                                        <i class="bi bi-calendar"></i> {{ ad.published_date.strftime('%d/%m/%Y') }}<br>
+                                        <i class="bi bi-person"></i> Usuario ID: {{ ad.user_id }}
+                                    </small>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-danger btn-sm" 
+                                            onclick="deleteAd({{ ad.id }}, '{{ ad.title }}')">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if ads.pages > 1 %}
+            <nav aria-label="Paginación de anuncios">
+                <ul class="pagination justify-content-center">
+                    {% if ads.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_ads', page=ads.prev_num, search=search) }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in ads.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != ads.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_ads', page=page_num, search=search) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if ads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_ads', page=ads.next_num, search=search) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteAd(adId, adTitle) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el anuncio "${adTitle}"?`)) {
+        return;
+    }
+    
+    fetch(`/api/admin/ads/${adId}/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al eliminar el anuncio', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

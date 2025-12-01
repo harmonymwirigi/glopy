@@ -1,0 +1,22 @@
+{
+    "name": "Scraper Genérico con IA y Local Storage",
+    "version": "1.0",
+    "manifest_version": 3,
+    "description": "Extensión genérica que detecta selector de anuncios por dominio (OpenAI), abre anuncios en pestaña aparte y extrae info.",
+    "permissions": [
+      "scripting",
+      "storage",
+      "tabs",
+      "activeTab"
+    ],
+    "host_permissions": [
+      "<all_urls>"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    }
+  }
+  

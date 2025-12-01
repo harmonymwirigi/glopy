@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Te han invitado a {{ app_name }}!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        .invitation-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid {{ primary_color }};
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: {{ primary_color }};
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .cta-button:hover {
+            background-color: {{ secondary_color }};
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        .points-info {
+            background-color: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .points-info h3 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            {% if logo_url %}
+            <img src="{{ logo_url }}" alt="{{ app_name }}" class="logo">
+            {% endif %}
+            <h1 style="color: {{ primary_color }};">¡Te han invitado a {{ app_name }}!</h1>
+        </div>
+
+        <p>Hola,</p>
+        
+        <p><strong>{{ inviter_name }}</strong> te ha invitado a unirte a <strong>{{ app_name }}</strong>, la plataforma donde puedes encontrar y publicar anuncios de inmuebles, coches, electrónica y mucho más.</p>
+
+        <div class="invitation-box">
+            <h3>¿Qué es {{ app_name }}?</h3>
+            <ul>
+                <li>🔍 <strong>Busca</strong> propiedades, vehículos y productos</li>
+                <li>📝 <strong>Publica</strong> tus propios anuncios</li>
+                <li>💾 <strong>Guarda</strong> búsquedas favoritas</li>
+                <li>📧 <strong>Recibe</strong> alertas personalizadas</li>
+                <li>⭐ <strong>Gana</strong> puntos Glopy por participar</li>
+            </ul>
+        </div>
+
+        <div class="points-info">
+            <h3>🎉 ¡Gana puntos Glopy!</h3>
+            <p>Al registrarte con esta invitación, <strong>{{ inviter_name }}</strong> ganará <strong>50 puntos Glopy</strong> como recompensa por invitarte. ¡Y tú también podrás ganar puntos invitando a otros!</p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ invitation_url }}" class="cta-button">Aceptar Invitación</a>
+        </div>
+
+        <p><strong>Esta invitación expira en 7 días.</strong></p>
+
+        <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
+        <p style="word-break: break-all; color: {{ primary_color }};">{{ invitation_url }}</p>
+
+        <p>¡Esperamos verte pronto en {{ app_name }}!</p>
+
+        <div class="footer">
+            <p>Este email fue enviado porque {{ inviter_name }} te invitó a {{ app_name }}.</p>
+            <p>Si no esperabas esta invitación, puedes ignorar este correo.</p>
+            <p>© 2024 {{ app_name }}. Todos los derechos reservados.</p>
+            {% if support_email %}
+            <p>¿Necesitas ayuda? Contáctanos en <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

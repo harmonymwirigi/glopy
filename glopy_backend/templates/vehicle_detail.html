@@ -1,0 +1,368 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+<style>
+    .vehicle-detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .vehicle-detail-container {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
+    
+    .vehicle-gallery {
+        margin-bottom: 2rem;
+    }
+    
+    .main-image {
+        width: 100%;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .thumbnail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+    }
+    
+    .thumbnail {
+        width: 100%;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 3px solid #e9ecef;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .spec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .spec-item {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 16px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .spec-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .spec-item:hover .spec-icon,
+    .spec-item:hover .spec-value,
+    .spec-item:hover .spec-label {
+        color: white;
+    }
+    
+    .spec-icon {
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+    
+    .spec-value {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        transition: color 0.3s ease;
+    }
+    
+    .spec-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .vehicle-title-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .vehicle-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .vehicle-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .badge {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-featured { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #000; }
+    .badge-new { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff; }
+    .badge-urgent { background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%); color: #fff; }
+    .badge-guaranteed { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: #fff; }
+    
+    .description-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border-left: 4px solid #667eea;
+    }
+    
+    .location-section {
+        background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .contact-seller-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1.25rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .contact-seller-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .back-button {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Professional Header -->
+<div class="vehicle-detail-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-car-front-fill"></i> {{ vehicle.title }}</h1>
+                <p>Detalles del vehículo</p>
+            </div>
+            <a href="{{ url_for('autos') }}" class="back-button">
+                <i class="bi bi-arrow-left"></i> Volver a resultados
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="vehicle-detail-container">
+        <!-- Title and Price Section -->
+        <div class="vehicle-title-section">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="vehicle-badges">
+                        {% if vehicle.is_featured %}<span class="badge badge-featured">⭐ Destacado</span>{% endif %}
+                        {% if vehicle.is_new %}<span class="badge badge-new">🆕 Nuevo</span>{% endif %}
+                        {% if vehicle.is_urgent %}<span class="badge badge-urgent">🔥 Urgente</span>{% endif %}
+                        {% if vehicle.is_guaranteed %}<span class="badge badge-guaranteed">✓ Garantizado</span>{% endif %}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="vehicle-price">
+                        {{ "{:,.0f}".format(vehicle.price).replace(',', '.') }} €
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Image Gallery -->
+        <div class="vehicle-gallery">
+            {% if vehicle.images and vehicle.images|length > 0 %}
+                <img src="{{ vehicle.images[0].image_url }}" class="main-image" id="mainImage" alt="{{ vehicle.title }}">
+                
+                {% if vehicle.images|length > 1 %}
+                <div class="thumbnail-grid">
+                    {% for image in vehicle.images %}
+                    <img src="{{ image.image_url }}" class="thumbnail {% if loop.first %}active{% endif %}" 
+                         onclick="changeMainImage('{{ image.image_url }}', this)" alt="Imagen {{ loop.index }}">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="main-image d-flex align-items-center justify-content-center" style="background: #f8f9fa;">
+                    <i class="bi bi-car-front" style="font-size: 5rem; color: #ccc;"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Specifications Grid -->
+        <h4 class="mb-3">Especificaciones</h4>
+        <div class="spec-grid">
+            <div class="spec-item">
+                <i class="bi bi-calendar3 spec-icon"></i>
+                <div class="spec-value">{{ vehicle.year }}</div>
+                <div class="spec-label">Año</div>
+            </div>
+            
+            {% if vehicle.mileage %}
+            <div class="spec-item">
+                <i class="bi bi-speedometer2 spec-icon"></i>
+                <div class="spec-value">{{ "{:,.0f}".format(vehicle.mileage).replace(',', '.') }} km</div>
+                <div class="spec-label">Kilometraje</div>
+            </div>
+            {% endif %}
+            
+            {% if vehicle.fuel_type %}
+            <div class="spec-item">
+                <i class="bi bi-fuel-pump spec-icon"></i>
+                <div class="spec-value">{{ vehicle.fuel_type }}</div>
+                <div class="spec-label">Combustible</div>
+            </div>
+            {% endif %}
+            
+            {% if vehicle.transmission %}
+            <div class="spec-item">
+                <i class="bi bi-gear spec-icon"></i>
+                <div class="spec-value">{{ vehicle.transmission }}</div>
+                <div class="spec-label">Transmisión</div>
+            </div>
+            {% endif %}
+            
+            {% if vehicle.horsepower %}
+            <div class="spec-item">
+                <i class="bi bi-lightning-charge spec-icon"></i>
+                <div class="spec-value">{{ vehicle.horsepower }} CV</div>
+                <div class="spec-label">Potencia</div>
+            </div>
+            {% endif %}
+            
+            {% if vehicle.doors %}
+            <div class="spec-item">
+                <i class="bi bi-door-open spec-icon"></i>
+                <div class="spec-value">{{ vehicle.doors }}</div>
+                <div class="spec-label">Puertas</div>
+            </div>
+            {% endif %}
+            
+            {% if vehicle.color %}
+            <div class="spec-item">
+                <i class="bi bi-palette spec-icon"></i>
+                <div class="spec-value">{{ vehicle.color }}</div>
+                <div class="spec-label">Color</div>
+            </div>
+            {% endif %}
+            
+            <div class="spec-item">
+                <i class="bi bi-{% if vehicle.seller_type == 'Profesional' %}building{% else %}person{% endif %} spec-icon"></i>
+                <div class="spec-value">{{ vehicle.seller_type or 'N/A' }}</div>
+                <div class="spec-label">Vendedor</div>
+            </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="description-section">
+            <h4 class="mb-3"><i class="bi bi-file-text"></i> Descripción</h4>
+            <p class="mb-0">{{ vehicle.description or 'Sin descripción disponible.' }}</p>
+        </div>
+        
+        <!-- Location -->
+        {% if vehicle.location %}
+        <div class="location-section">
+            <h4 class="mb-3"><i class="bi bi-geo-alt-fill"></i> Ubicación</h4>
+            <p class="mb-0">{{ vehicle.location.name }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- Contact Seller Button -->
+        <div class="mt-4">
+            <button class="contact-seller-btn" onclick="contactSeller()">
+                <i class="bi bi-envelope"></i> Contactar con el vendedor
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function changeMainImage(imageUrl, thumbnail) {
+    document.getElementById('mainImage').src = imageUrl;
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumbnail.classList.add('active');
+}
+
+function contactSeller() {
+    {% if 'user_id' in session %}
+        alert('Función de contacto próximamente. Por ahora, puedes ver los datos del vendedor arriba.');
+    {% else %}
+        if (confirm('Debes iniciar sesión para contactar con el vendedor. ¿Ir a login?')) {
+            window.location.href = '{{ url_for("login") }}';
+        }
+    {% endif %}
+}
+</script>
+{% endblock %}
+

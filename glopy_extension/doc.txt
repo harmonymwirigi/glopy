@@ -1,0 +1,28 @@
+RESTANTE
+SOLO HACER SCROLL HASTA LA MITAD DE LA PÁGINA PARA ENVIAR INFO A OPENAI PARA QUE NOS DIGA EL selector, DESPUÉS HACER HASTA EL FINAL PARA CARGAR DINAMICAMENTE TODOS LOS ANUNCIOS
+CAMBIAR EL MODELO A UNO QUE ACEPTE MÁS TOKENS
+¡¡- Procesar mejor el html que enviamos a openai para evitar exceder el máximo de tokens (me ha dado error en milanuncios)
+
+
+- Pasarle a openai la api, para que nos diga como podemos hacer las peticiones para que nos diga los selectores que contienen la información relevante para nosotros
+
+- Mejorar service worker para que nos de más console log de cada anuncio (poder hacer mejor la depuración)
+-PRUEBAS
+- Ver si es consistente para varios portales
+
+- En el caso de que no funcione con el selector que había guardado, volver a hacer la petición a openai 
+
+
+
+
+
+
+HECHO 
+- Mejorar service worker para que nos diga si se está haciendo petición a openai o si estamos usando la info guardada en la bdd 
+
+
+
+- Hacer que openai nos diga el selector idoneo para entrar en los anucnios
+- Entrar en cada anuncio, cerras pestaña y entrar en el siguiente
+- Guardar selector que nos da open ai en bdd para que no tener que volverselo a pedir
+- Ver si reutiliza el selector

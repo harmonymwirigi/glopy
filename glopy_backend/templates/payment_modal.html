@@ -1,0 +1,507 @@
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="bi bi-credit-card"></i> Pago para Anuncio Premium
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-grid">
+                    <div class="payment-info">
+                        <h6 class="mb-3">
+                            <i class="bi bi-receipt"></i> Resumen del Pago
+                        </h6>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Anuncio Premium:</span>
+                            <span id="paymentPrice" class="fw-bold">€0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>IVA (21%):</span>
+                            <span id="paymentTax" class="fw-bold">€0.00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total:</span>
+                            <span id="paymentTotal" class="text-primary">€0.00</span>
+                        </div>
+                    </div>
+                    <div class="payment-form">
+                        <h6 class="mb-3">
+                            <i class="bi bi-credit-card"></i> Información de Pago
+                        </h6>
+                        <form id="paymentForm">
+                            <div id="payment-element">
+                                <!-- Stripe Elements will be inserted here -->
+                            </div>
+                            <div id="payment-message" class="d-none"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="submitPayment" disabled>
+                    <i class="bi bi-credit-card"></i> Pagar <span id="paymentButtonTotal">€0.00</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.payment-form {
+    padding: 1.5rem 0;
+    height: 100%;
+    min-width: 0; /* Allow flexbox to shrink */
+}
+
+/* CSS Grid layout for equal width columns */
+.payment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    width: 100%;
+}
+
+@media (max-width: 767px) {
+    .payment-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* Ensure the payment information section takes full width */
+.payment-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+}
+
+.payment-info h6,
+.payment-form h6 {
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+#payment-element {
+    margin-bottom: 1rem;
+}
+
+#payment-message {
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+#payment-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#payment-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.StripeElement {
+    background: white;
+    padding: 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    font-size: 16px;
+    line-height: 1.5;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.StripeElement--focus {
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.StripeElement--invalid {
+    border-color: #dc3545;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.StripeElement--webkit-autofill {
+    background-color: #fefde5 !important;
+}
+
+/* Make the payment element container more prominent */
+#payment-element {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Ensure Stripe Elements get proper space */
+#payment-element .StripeElement {
+    flex: 1;
+    min-height: 50px;
+}
+
+/* Force all Stripe Elements to be block and full width */
+#payment-element * {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Specific styling for Stripe input fields */
+#payment-element input,
+#payment-element .StripeElement,
+#payment-element .p-Input,
+#payment-element [data-testid="payment-element"],
+#payment-element .p-InputContainer,
+#payment-element .p-InputElement,
+#payment-element .p-InputField {
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Target Stripe's internal elements more aggressively */
+#payment-element iframe,
+#payment-element .p-Input,
+#payment-element .p-InputContainer,
+#payment-element .p-InputElement,
+#payment-element .p-InputField,
+#payment-element .p-InputWrapper,
+#payment-element .__PrivateStripeElement {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+}
+
+/* Target the specific Stripe iframe that's being generated */
+#payment-element iframe[name*="StripeFrame"] {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+}
+
+/* Force the Stripe container to be full width */
+#payment-element .__PrivateStripeElement {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+}
+
+/* Ensure the payment form takes full width */
+.payment-form {
+    width: 100%;
+}
+
+.payment-form form {
+    width: 100%;
+}
+</style>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+let stripe;
+let elements;
+let paymentIntent;
+let paymentId;
+
+// Initialize Stripe
+document.addEventListener('DOMContentLoaded', function() {
+    // This will be set when the modal is opened
+});
+
+function openPaymentModal(price) {
+    // Show processing state on pay button
+    const payButton = document.getElementById('payButton');
+    let originalText = '';
+    if (payButton) {
+        originalText = payButton.innerHTML;
+        payButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+        payButton.disabled = true;
+        
+        // Reset button after 3 seconds if modal doesn't open
+        setTimeout(() => {
+            if (payButton.disabled) {
+                payButton.innerHTML = originalText;
+                payButton.disabled = false;
+            }
+        }, 3000);
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    
+    // Update price display
+    const tax = price * 0.21; // 21% IVA
+    const total = price + tax;
+    
+    document.getElementById('paymentPrice').textContent = `€${price.toFixed(2)}`;
+    document.getElementById('paymentTax').textContent = `€${tax.toFixed(2)}`;
+    document.getElementById('paymentTotal').textContent = `€${total.toFixed(2)}`;
+    document.getElementById('paymentButtonTotal').textContent = `€${total.toFixed(2)}`;
+    
+    // Initialize Stripe if not already done
+    if (!stripe) {
+        const publishableKey = '{{ STRIPE_PUBLISHABLE_KEY }}';
+        console.log('Stripe Publishable Key:', publishableKey ? 'Key present' : 'Key missing');
+        
+        if (!publishableKey || publishableKey === '' || publishableKey === 'None') {
+            showPaymentMessage('Stripe no está configurado correctamente. Contacta al administrador.', 'error');
+            console.error('Stripe publishable key is missing or empty');
+            // Reset button on error
+            if (payButton) {
+                payButton.innerHTML = originalText;
+                payButton.disabled = false;
+            }
+            return;
+        }
+        
+        try {
+            stripe = Stripe(publishableKey);
+            console.log('Stripe initialized successfully');
+        } catch (error) {
+            console.error('Error initializing Stripe:', error);
+            showPaymentMessage('Error al inicializar Stripe. Contacta al administrador.', 'error');
+            // Reset button on error
+            if (payButton) {
+                payButton.innerHTML = originalText;
+                payButton.disabled = false;
+            }
+            return;
+        }
+    }
+    
+    // Create payment intent
+    createPaymentIntent(price).then(() => {
+        modal.show();
+        // Reset button when modal opens successfully
+        if (payButton) {
+            payButton.innerHTML = originalText;
+            payButton.disabled = false;
+        }
+    }).catch(error => {
+        console.error('Error creating payment intent:', error);
+        // Reset button on error
+        if (payButton) {
+            payButton.innerHTML = originalText;
+            payButton.disabled = false;
+        }
+    });
+}
+
+async function createPaymentIntent(amount) {
+    try {
+        const response = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ amount: amount })
+        });
+        
+        const data = await response.json();
+        
+        if (data.client_secret) {
+            paymentIntent = data;
+            paymentId = data.payment_id; // Store the payment ID
+            
+            // Create elements
+            elements = stripe.elements({
+                clientSecret: data.client_secret,
+                appearance: {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#667eea',
+                        colorBackground: '#ffffff',
+                        colorText: '#30313d',
+                        colorDanger: '#df1b41',
+                        fontFamily: 'Ideal Sans, system-ui, sans-serif',
+                        spacingUnit: '2px',
+                        borderRadius: '4px',
+                    },
+                    rules: {
+                        '.Input': {
+                            width: '100%',
+                            display: 'block'
+                        },
+                        '.InputContainer': {
+                            width: '100%',
+                            display: 'block'
+                        }
+                    }
+                }
+            });
+            
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            
+            // Force Stripe Elements to be block and full width after mounting
+            setTimeout(() => {
+                // Target all elements in the payment element
+                const stripeElements = document.querySelectorAll('#payment-element *');
+                stripeElements.forEach(element => {
+                    element.style.display = 'block';
+                    element.style.width = '100%';
+                    element.style.minWidth = '100%';
+                    element.style.maxWidth = '100%';
+                    element.style.boxSizing = 'border-box';
+                });
+                
+                // Target the specific Stripe private element
+                const privateStripeElement = document.querySelector('#payment-element .__PrivateStripeElement');
+                if (privateStripeElement) {
+                    privateStripeElement.style.width = '100%';
+                    privateStripeElement.style.minWidth = '100%';
+                    privateStripeElement.style.maxWidth = '100%';
+                    privateStripeElement.style.display = 'block';
+                }
+                
+                // Target the Stripe iframe specifically
+                const stripeIframe = document.querySelector('#payment-element iframe[name*="StripeFrame"]');
+                if (stripeIframe) {
+                    stripeIframe.style.width = '100%';
+                    stripeIframe.style.minWidth = '100%';
+                    stripeIframe.style.maxWidth = '100%';
+                    stripeIframe.style.display = 'block';
+                }
+                
+                // Also target specific Stripe classes
+                const stripeInputs = document.querySelectorAll('#payment-element .p-Input, #payment-element .p-InputContainer, #payment-element .p-InputElement, #payment-element .p-InputField');
+                stripeInputs.forEach(element => {
+                    element.style.width = '100%';
+                    element.style.minWidth = '100%';
+                    element.style.maxWidth = '100%';
+                    element.style.display = 'block';
+                });
+            }, 1000);
+            
+            // Enable submit button
+            document.getElementById('submitPayment').disabled = false;
+            
+            // Handle form submission
+            document.getElementById('submitPayment').onclick = handlePayment;
+            
+        } else {
+            showPaymentMessage('Error al crear el pago: ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showPaymentMessage('Error al procesar el pago', 'error');
+    }
+}
+
+async function handlePayment() {
+    const submitButton = document.getElementById('submitPayment');
+    const originalText = submitButton.innerHTML;
+    
+    submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+    submitButton.disabled = true;
+    
+    try {
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.href,
+            },
+        });
+        
+        if (error) {
+            showPaymentMessage(error.message, 'error');
+        } else {
+            // Payment succeeded
+            await confirmPayment();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showPaymentMessage('Error al procesar el pago', 'error');
+    } finally {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    }
+}
+
+async function confirmPayment() {
+    try {
+        console.log('Confirming payment with ID:', paymentId);
+        
+        const response = await fetch('/api/confirm-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ payment_id: paymentId })
+        });
+        
+        const data = await response.json();
+        console.log('Payment confirmation response:', data);
+        
+        if (data.success) {
+            showPaymentMessage('¡Pago exitoso! Ya puedes publicar tu anuncio.', 'success');
+            
+            // Hide the payment button
+            const payButton = document.getElementById('payButton');
+            if (payButton) {
+                payButton.style.display = 'none';
+            }
+            
+            // Update the ad limit display to show premium status
+            const limitInfo = document.getElementById('adLimitInfo');
+            if (limitInfo) {
+                limitInfo.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="bi bi-star-fill"></i>
+                        <strong>¡Pago exitoso!</strong> Ya puedes publicar anuncios ilimitados.
+                    </div>
+                `;
+            }
+            
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+                // Reload the page to refresh the form state
+                location.reload();
+            }, 2000);
+        } else {
+            showPaymentMessage(data.message || 'Error al confirmar el pago', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showPaymentMessage('Error al confirmar el pago', 'error');
+    }
+}
+
+function showPaymentMessage(message, type) {
+    const messageDiv = document.getElementById('payment-message');
+    messageDiv.className = `d-block ${type}`;
+    messageDiv.textContent = message;
+}
+</script>

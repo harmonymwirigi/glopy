@@ -1,0 +1,45 @@
+/* Widget global de usuario + logout (siempre visible) */
+.user-widget {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 9999px;
+    padding: .35rem .5rem .35rem .6rem;
+    z-index: 1100; /* por encima del contenido */
+    opacity: .9;
+}
+.user-widget:hover { opacity: 1; }
+.user-widget__name { 
+    font-size: .9rem; 
+    display: flex;
+    align-items: center;
+}
+.user-widget__logout { padding-top: .15rem; padding-bottom: .15rem; }
+
+/* Verified badge styles */
+.verified-badge {
+    font-size: 0.85em;
+    vertical-align: middle;
+}
+
+/* Ensure verified badge scales well in different contexts */
+.user-widget .verified-badge {
+    font-size: 0.75em;
+}
+
+.navbar .verified-badge {
+    font-size: 0.8em;
+}
+
+.profile-header .verified-badge {
+    font-size: 0.9em;
+}
+
+/* Si existe una bottom-nav fija, sube el widget para no taparla (browsers modernos) */
+@supports selector(body:has(.bottom-nav)) {
+  body:has(.bottom-nav) .user-widget { bottom: 4.5rem; }
+}
+

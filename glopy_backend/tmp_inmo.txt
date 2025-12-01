@@ -1,0 +1,471 @@
+﻿{% extends "base2.html" %}
+
+{# Bloque para aÃ±adir el CSS especÃ­fico de esta pÃ¡gina al <head> #}
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Cabecera de BÃºsqueda y Filtros (Nuevo DiseÃ±o) -->
+<div class="search-header-inmo">
+    <div class="top-bar">
+        <a href="{{ url_for('home') }}" class="back-arrow-inmo"><i class="bi bi-chevron-left"></i></a>
+        <div class="search-box-inmo">
+            <i class="bi bi-search"></i>
+            {# NUEVO: Input para el autocompletado y un input oculto para el ID #}
+            <input type="text" class="form-control" id="locationSearchInput" placeholder="Buscar lugar">
+            <input type="hidden" id="selectedLocationId" name="location_id"> {# Este guardarÃ¡ el ID de la ubicaciÃ³n #}
+            {# Contenedor para las sugerencias #}
+            <div id="locationSuggestions" class="autocomplete-suggestions"></div>
+        </div>
+        <a href="#" class="map-button">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Mapa</span>
+        </a>
+    </div>
+    <div class="filter-pills">
+        <button class="btn btn-pill active" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+            <i class="bi bi-sliders"></i> Filtros
+        </button>
+
+        {# Mostramos las primeras 2 pÃ­ldoras #}
+        {% for filter in active_filters[:2] %}
+            <a href="#" class="btn btn-pill remove-filter-btn" data-filter-key="{{ filter.key }}">
+                {{ filter.label }} <i class="bi bi-x"></i>
+            </a>
+        {% endfor %}
+
+        {# Si hay mÃ¡s de 2 filtros, mostramos un botÃ³n "+N" con un dropdown #}
+        {% if active_filters|length > 2 %}
+            <div class="dropdown">
+                <button class="btn btn-pill dropdown-toggle" type="button" id="moreFiltersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    +{{ active_filters|length - 2 }} mÃ¡s
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="moreFiltersDropdown">
+                    {# Mostramos el resto de los filtros en el dropdown #}
+                    {% for filter in active_filters[2:] %}
+                    <li>
+                        <a class="dropdown-item remove-filter-btn" href="#" data-filter-key="{{ filter.key }}">
+                            {{ filter.label }} <i class="bi bi-x"></i>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- CONTENEDOR DE FILTROS (Collapse) - CON EL FORMULARIO SIMPLIFICADO -->
+<div class="collapse mb-4" id="filtersCollapse">
+  <div class="filters-area p-3 bg-white">
+    <form method="GET" action="{{ url_for('inmobiliaria') }}">
+        {% if request.args.get('location_id') %}
+            <input type="hidden" name="location_id" value="{{ request.args.get('location_id') }}">
+        {% endif %}
+        {% if selected_cat_id %}
+        <input type="hidden" name="cat_id" value="{{ selected_cat_id }}">
+        {% endif %}
+
+        <h5 class="filter-title">Filtros Principales</h5>
+
+        <!-- RANGO DE PRECIOS -->
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label for="min_price" class="form-label">Precio MÃ­nimo</label>
+            <input type="number" step="any" class="form-control" name="min_price" id="min_price" placeholder="â‚¬">
+          </div>
+          <div class="col-6 mb-3">
+            <label for="max_price" class="form-label">Precio MÃ¡ximo</label>
+            <input type="number" step="any" class="form-control" name="max_price" id="max_price" placeholder="â‚¬">
+          </div>
+        </div>
+
+        <!-- RANGO DE MÂ² -->
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label for="min_m2" class="form-label">MÂ² MÃ­nimos</label>
+            <input type="number" step="any" class="form-control" name="min_m2" id="min_m2" placeholder="mÂ²">
+          </div>
+          <div class="col-6 mb-3">
+            <label for="max_m2" class="form-label">MÂ² MÃ¡ximos</label>
+            <input type="number" step="any" class="form-control" name="max_m2" id="max_m2" placeholder="mÂ²">
+          </div>
+        </div>
+
+        <!-- HABITACIONES Y BAÃ‘OS -->
+        <div class="row">
+          <div class="col-6 mb-3">
+            <label for="rooms" class="form-label">Habitaciones (mÃ­n.)</label>
+            <input type="number" class="form-control" name="rooms" id="rooms" placeholder="Ej: 2">
+          </div>
+          <div class="col-6 mb-3">
+            <label for="bathrooms" class="form-label">BaÃ±os (mÃ­n.)</label>
+            <input type="number" class="form-control" name="bathrooms" id="bathrooms" placeholder="Ej: 1">
+          </div>
+        </div>
+
+        <!-- TIPO DE INMUEBLE Y ESTADO (AHORA DESHABILITADOS) -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="property_type" class="form-label">Tipo de inmueble</label>
+            <select name="property_type" id="property_type" class="form-select" disabled> {# <--- AÃ‘ADIDO disabled #}
+              <option value="" selected>Cualquiera</option>
+              <option value="Piso">Piso</option>
+              <option value="Casa">Casa</option>
+              <option value="Chalet">Chalet</option>
+              <option value="Ãtico">Ãtico</option>
+              <option value="DÃºplex">DÃºplex</option>
+              <option value="Loft">Loft</option>
+              <option value="Estudio">Estudio</option>
+              <option value="Terreno">Terreno</option>
+              <option value="Local o nave">Local o nave</option>
+              <option value="Garaje">Garaje</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="property_state" class="form-label">Estado del inmueble</label>
+            <select name="property_state" id="property_state" class="form-select" disabled> {# <--- AÃ‘ADIDO disabled #}
+              <option value="">Cualquiera</option>
+              <option value="obra nueva">Obra nueva</option>
+              <option value="segunda mano (buen estado)">Buen estado</option>
+              <option value="segunda mano (a reformar)">A reformar</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="my-3">
+        <h5 class="filter-title">CaracterÃ­sticas y Extras</h5>
+
+        <!-- CHECKBOXES PARA EXTRAS IMPORTANTES -->
+        <div class="row">
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_terrace" id="has_terrace" value="1">
+              <label class="form-check-label" for="has_terrace">Terraza</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_parking" id="has_parking" value="1">
+              <label class="form-check-label" for="has_parking">Parking</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_pool" id="has_pool" value="1">
+              <label class="form-check-label" for="has_pool">Piscina</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_elevator" id="has_elevator" value="1">
+              <label class="form-check-label" for="has_elevator">Ascensor</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_garden" id="has_garden" value="1">
+              <label class="form-check-label" for="has_garden">JardÃ­n</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="furnished" id="furnished" value="SÃ­">
+              <label class="form-check-label" for="furnished">Amueblado</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="pets_allowed" id="pets_allowed" value="1">
+              <label class="form-check-label" for="pets_allowed">Admite mascotas</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_air_conditioning" id="has_air_conditioning" value="1">
+              <label class="form-check-label" for="has_air_conditioning">Aire Acond.</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_heating" id="has_heating" value="1">
+              <label class="form-check-label" for="has_heating">CalefacciÃ³n</label>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="is_exterior" id="is_exterior" value="1">
+              <label class="form-check-label" for="is_exterior">Exterior</label>
+            </div>
+          </div>
+           <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_fitted_wardrobes" id="has_fitted_wardrobes" value="1">
+              <label class="form-check-label" for="has_fitted_wardrobes">Armarios E.</label>
+            </div>
+          </div>
+           <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="has_storage_room" id="has_storage_room" value="1">
+              <label class="form-check-label" for="has_storage_room">Trastero</label>
+            </div>
+          </div>
+           <div class="col-6 col-md-4 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" name="is_accessible" id="is_accessible" value="1">
+              <label class="form-check-label" for="is_accessible">Accesible</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTONES DE ACCIÃ“N DEL FORMULARIO -->
+        <hr class="my-4">
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                <i class="bi bi-search"></i> Ver resultados
+            </button>
+            <button type="reset" class="btn btn-outline-secondary">Limpiar filtros</button>
+        </div>
+    </form>
+  </div>
+</div>
+<!-- FIN DE FILTROS -->
+
+
+<div class="content-sheet">
+    <div class="listing-title-container">
+        <h3>Viviendas en Valencia</h3>
+        <p>{{ sector.anuncios|length }} resultados</p>
+    </div>
+
+    <!-- Anuncios RediseÃ±ados -->
+    <div class="row row-cols-1 g-3">
+        {% for anuncio in sector.anuncios %}
+        <div class="col">
+            <div class="listing-card">
+              <a href="{{ url_for('announcement_detail', announcement_id=anuncio.id) }}" class="listing-card-link">
+                <div class="listing-image-container">
+                    {# El carrusel ahora tiene data-bs-ride="carousel" para el deslizamiento automÃ¡tico #}
+                    {% if anuncio.images and anuncio.images|length > 0 %}
+                      <div id="carousel{{ anuncio.id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                        <div class="carousel-inner">
+                          {% for img in anuncio.images %}
+                          <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <img 
+                                src="{{ img.image_url }}" 
+                                class="d-block w-100 announcement-image" 
+                                alt="{{ anuncio.title }}"
+                                data-fallback-src="{{ url_for('static', filename='LOGOS/Logo_Glopy.png') }}"    
+                            >
+                          </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <div class="image-counter">1 / {{ anuncio.images|length }}</div>
+                    {% else %}
+                      <img 
+                          src="{{ anuncio.image or url_for('static', filename='LOGOS/Logo_Glopy.png') }}" 
+                          class="d-block w-100 announcement-image {% if not anuncio.image %}fallback-logo{% endif %}"
+                          alt="{{ anuncio.title }}"
+                          data-fallback-src="{{ url_for('static', filename='LOGOS/Logo_Glopy.png') }}"
+                      >
+                    {% endif %}
+                    <a href="#" class="favorite-btn"><i class="bi bi-star-fill"></i></a>
+                </div>
+                <div class="listing-details">
+                    <div class="price">{{ '{:,.0f}'.format(anuncio.price | float).replace(',', '.') }} â‚¬</div>
+                    <h5 class="title"><strong>{% if anuncio.title %}{{ anuncio.title }}{% else %}Glopy{% endif %}</strong></h5>
+                    <p class="location">{{ anuncio.location_text or 'Detalles no especificados' }}</p>
+                    <p class="specs">
+                        {% if anuncio.rooms %}{{ anuncio.rooms }} hab.<span> Â· </span>{% endif %}
+                        {% if anuncio.bathrooms %}{{ anuncio.bathrooms }} baÃ±os<span> Â· </span>{% endif %}
+                        {% if anuncio.square_meters %}{{ "%.0f"|format(anuncio.square_meters|float) }} mÂ²{% endif %}
+                    </p>
+                </div>
+              </a>
+            </div>
+            {% if anuncio.domain_logo_url %}
+              <img src="{{ anuncio.domain_logo_url }}" alt="Logo del portal" class="domain-origin-logo">
+            {% endif %}
+        </div>
+        {% else %}
+            <div class="col-12"><div class="alert alert-info text-center">No hay anuncios que cumplan los criterios.</div></div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- BotÃ³n Flotante (FAB) -->
+<div class="fab-container">
+    <div class="fab-speech-bubble">Â¿En quÃ© puedo ayudarte?</div>
+    <button class="fab">
+        <img src="{{ url_for('static', filename='Accion_interactuar_Glopy_GIF.gif') }}" alt="Glopy">
+    </button>
+</div>
+
+<!-- Barra de navegaciÃ³n inferior (reutilizable) -->
+{% include 'bottom_nav.html' %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Se ejecuta cuando todo el contenido de la pÃ¡gina se ha cargado
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    // 1. LÃ³gica para el contador de los carruseles (la que ya tenÃ­as)
+    const carousels = document.querySelectorAll('.carousel');
+    carousels.forEach(function (carousel) {
+      const carouselId = carousel.id;
+      const counter = carousel.parentElement.querySelector('.image-counter');
+      if (counter) {
+        const totalItems = carousel.querySelectorAll('.carousel-item').length;
+        carousel.addEventListener('slid.bs.carousel', function (event) {
+          const activeIndex = event.to + 1;
+          counter.textContent = `${activeIndex} / ${totalItems}`;
+        });
+      }
+    });
+
+    // 2. NUEVA LÃ“GICA PARA MANEJAR IMÃGENES ROTAS
+    // Seleccionamos todas las imÃ¡genes que marcamos con la clase 'announcement-image'
+    const imagesToWatch = document.querySelectorAll('.announcement-image');
+
+    // Recorremos cada una de esas imÃ¡genes
+    imagesToWatch.forEach(function(img) {
+      // Y a cada una le aÃ±adimos un "oyente" para el evento 'error'
+      img.addEventListener('error', function() {
+        // Cuando ocurra un error al cargar la imagen 'img':
+        const fallbackSrc = this.dataset.fallbackSrc; // Obtenemos la URL de reemplazo del atributo 'data-'
+        
+        // Comprobamos que no estemos ya mostrando la imagen de fallback para evitar bucles
+        if (this.src !== fallbackSrc) {
+            this.src = fallbackSrc; // Cambiamos la fuente a la del logo de Glopy
+            this.classList.add('fallback-logo'); // AÃ±adimos la clase para estilizar el logo
+        }
+      });
+    });
+
+    const removeFilterButtons = document.querySelectorAll('.remove-filter-btn');
+    
+    
+    removeFilterButtons.forEach(function(button) {
+        // AÃ±adimos un "oyente" para el evento 'click'
+        button.addEventListener('click', function(event) {
+            // a) Prevenimos la acciÃ³n por defecto del enlace (que es navegar a href="#")
+            event.preventDefault();
+
+            // b) Obtenemos los parÃ¡metros de la URL actual
+            const currentParams = new URLSearchParams(window.location.search);
+            
+            // c) Leemos la clave del filtro que este botÃ³n debe eliminar (desde el atributo data-)
+            //    'this' se refiere al botÃ³n que acaba de ser clickeado.
+            const filterKeyToRemove = this.dataset.filterKey;
+            
+            // d) Eliminamos ese parÃ¡metro de la lista
+            currentParams.delete(filterKeyToRemove);
+            
+            // e) Construimos la nueva URL y redirigimos la pÃ¡gina
+            //    .toString() convierte los parÃ¡metros de vuelta a un string como "rooms=2&max_price=2000"
+            const newUrl = window.location.pathname + '?' + currentParams.toString();
+            
+            // f) Navegamos a la nueva URL, recargando la pÃ¡gina con los filtros actualizados
+            window.location.href = newUrl;
+        });
+    });
+
+    // d. NUEVA LÃ“GICA: AUTOCOMPLETADO DE UBICACIONES Y ENVÃO DE FILTRO
+    const locationSearchInput = document.getElementById('locationSearchInput');
+    const selectedLocationIdInput = document.getElementById('selectedLocationId');
+    const locationSuggestionsContainer = document.getElementById('locationSuggestions');
+    const filterForm = document.getElementById('filterForm');
+
+    let debounceTimeout; // Para retrasar la bÃºsqueda mientras el usuario escribe
+
+    // FunciÃ³n para obtener sugerencias de la API
+    async function fetchSuggestions(query) {
+        // Asumiendo que tu API estÃ¡ en /api/ubicaciones/buscar
+        const response = await fetch(`/api/ubicaciones/buscar?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        return data;
+    }
+
+    // FunciÃ³n para mostrar las sugerencias en el DOM
+    function showSuggestions(suggestions) {
+        locationSuggestionsContainer.innerHTML = ''; // Limpiar sugerencias anteriores
+        if (suggestions.length === 0) {
+            locationSuggestionsContainer.style.display = 'none';
+            return;
+        }
+
+        suggestions.forEach(suggestion => {
+            const div = document.createElement('div');
+            div.classList.add('autocomplete-item');
+            div.textContent = suggestion.name;
+            div.dataset.id = suggestion.id; // Guardamos el ID para cuando se seleccione
+
+            div.addEventListener('click', function() {
+                // Al hacer clic en una sugerencia:
+                locationSearchInput.value = suggestion.name; // Ponemos el nombre en el input visible
+                selectedLocationIdInput.value = suggestion.id; // Guardamos el ID en el input oculto
+
+                locationSuggestionsContainer.style.display = 'none'; // Ocultamos las sugerencias
+
+                // Enviamos el formulario para aplicar el filtro
+                // Limpiamos otros filtros que no sean de ubicaciÃ³n para evitar conflictos
+                const currentParams = new URLSearchParams(window.location.search);
+                for (const [key, value] of currentParams.entries()) {
+                    if (key !== 'location_id') { // Mantenemos solo location_id
+                        currentParams.delete(key);
+                    }
+                }
+                currentParams.set('location_id', suggestion.id);
+                window.location.href = window.location.pathname + '?' + currentParams.toString();
+            });
+            locationSuggestionsContainer.appendChild(div);
+        });
+        locationSuggestionsContainer.style.display = 'block'; // Mostrar contenedor
+    }
+
+    // Event listener para el input de bÃºsqueda
+    locationSearchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimeout); // Reiniciar el temporizador
+        const query = this.value;
+
+        if (query.length > 0) { // Solo buscar si hay al menos un carÃ¡cter
+            debounceTimeout = setTimeout(async () => {
+                const suggestions = await fetchSuggestions(query);
+                showSuggestions(suggestions);
+            }, 300); // Esperar 300ms antes de buscar
+        } else {
+            locationSuggestionsContainer.style.display = 'none'; // Ocultar si el input estÃ¡ vacÃ­o
+            selectedLocationIdInput.value = ''; // Limpiar el ID si el usuario borra la bÃºsqueda
+            // Si el input se vacÃ­a, podrÃ­amos querer recargar sin filtro de ubicaciÃ³n
+            // Pero por ahora, no recargamos hasta que el usuario lo quite con la pÃ­ldora.
+        }
+    });
+
+    // Ocultar sugerencias si se hace clic fuera
+    document.addEventListener('click', function(event) {
+        if (!locationSearchInput.contains(event.target) && !locationSuggestionsContainer.contains(event.target)) {
+            locationSuggestionsContainer.style.display = 'none';
+        }
+    });
+
+    // Rellenar el input de bÃºsqueda si ya hay una ubicaciÃ³n seleccionada
+    const currentUrlParams = new URLSearchParams(window.location.search);
+    const initialLocationId = currentUrlParams.get('location_id');
+    const initialLocationName = "{{ current_location_name | default('') }}"; // Obtenemos el nombre del servidor
+    if (initialLocationId && initialLocationName) {
+        locationSearchInput.value = initialLocationName;
+        selectedLocationIdInput.value = initialLocationId;
+    }
+  });
+</script>
+{% endblock %}
+

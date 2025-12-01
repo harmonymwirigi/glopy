@@ -1,0 +1,1581 @@
+{% extends "base.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <style>
+    /* Beautiful Filters Styling - Same as Autos */
+    .filters-area {
+        background: white;
+        border-radius: 16px;
+        margin: 1rem auto;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        max-width: 1200px;
+    }
+
+    .filter-title {
+        color: #0071c2;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label-sm {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .filters-area .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .filters-area .row.g-3 > * {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: #0071c2;
+        box-shadow: 0 0 0 0.2rem rgba(0,113,194,0.25);
+        background: white;
+    }
+
+    /* Better Filter Layout for Large Screens */
+    .filters-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: end;
+        justify-content: space-between;
+    }
+
+    .filter-group {
+        min-width: 140px;
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .text-search {
+        min-width: 200px;
+        max-width: 300px;
+    }
+
+    .price-range {
+        min-width: 180px;
+        max-width: 220px;
+    }
+
+    .search-group {
+        min-width: 120px;
+        max-width: 140px;
+    }
+
+    .price-inputs {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .price-inputs input {
+        flex: 1;
+        min-width: 70px;
+        padding: 0.6rem 0.7rem;
+    }
+
+    .price-separator {
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .search-btn {
+        background: #0071c2 !important;
+        border-color: #0071c2 !important;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.2s;
+    }
+    
+    .search-btn:hover {
+        background: #005999 !important;
+        border-color: #005999 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,113,194,0.3);
+    }
+    
+    #moreFiltersCollapse .btn-outline-secondary {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    /* Beautiful Results Grid - Same as Autos */
+    .announcements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .announcement-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .listing-card {
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .listing-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .listing-image-container {
+        height: 180px;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .listing-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .listing-card:hover .listing-image-container img {
+        transform: scale(1.05);
+    }
+
+    .listing-details {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.25rem;
+        min-height: 120px;
+    }
+
+    .title {
+        font-size: 1.1rem;
+        line-height: 1.3;
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .price {
+        font-size: 1.4rem;
+        margin-bottom: 0.75rem;
+        color: #0071c2;
+        font-weight: 700;
+    }
+
+    .specs {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .spec-item i {
+        color: #0071c2;
+    }
+
+    .location {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: auto;
+    }
+
+    .location i {
+        color: #0071c2;
+    }
+
+    .badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 10;
+    }
+
+    .badge-premium {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .badge-urgent {
+        background: #dc3545;
+        color: white;
+    }
+
+    .results-header {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .results-header h5 {
+        color: #0071c2;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Commercial Ad Styling */
+    .commercial-ad-card {
+        border: 2px solid #ffc107 !important;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    }
+
+    .sponsored-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #ffc107;
+        color: #000;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        z-index: 10;
+        font-size: 0.8rem;
+    }
+
+    .company-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        padding: 0.75rem;
+        background: rgba(255, 193, 7, 0.1);
+        border-radius: 8px;
+    }
+
+    .company-info img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .company-info span {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .filters-area {
+            margin: 0.75rem;
+            padding: 1rem;
+        }
+        
+        .filters-row {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .filter-group {
+            max-width: 100%;
+            min-width: auto;
+        }
+        
+        .price-inputs {
+            gap: 0.25rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .form-check {
+            padding: 0.35rem 0.5rem;
+        }
+        
+        .form-check-label {
+            font-size: 0.85rem;
+        }
+        
+        .announcements-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        #moreFiltersCollapse .row.g-3 > * {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .announcements-grid {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .listing-card {
+            min-height: 300px;
+        }
+        
+        .listing-image-container {
+            height: 200px;
+        }
+    }
+
+    /* Autocomplete suggestions */
+    .autocomplete-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        margin-top: 4px;
+    }
+
+    .autocomplete-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+    }
+
+    .autocomplete-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-box-inmo {
+        position: relative;
+    }
+
+    /* View controls */
+    .view-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-btn.active {
+        background-color: #0071c2 !important;
+        color: white !important;
+        border-color: #0071c2 !important;
+    }
+
+    /* Filter Pills Styling */
+    .filter-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .btn-filter-pill {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #495057;
+        transition: all 0.2s;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-filter-pill:hover {
+        background: #f8f9fa;
+        border-color: #0071c2;
+        color: #0071c2;
+    }
+
+    .btn-filter-pill.btn-reset {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-filter-pill.btn-reset:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-filter-pill.btn-save {
+        border-color: #28a745;
+        color: #28a745;
+    }
+
+    .btn-filter-pill.btn-save:hover {
+        background: #28a745;
+        color: white;
+    }
+
+    .filter-badge {
+        background: #0071c2;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-left: 0.25rem;
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+    }
+    
+    @media (min-width: 992px) {
+        .features-grid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.2s;
+        margin: 0;
+    }
+
+    .form-check:hover {
+        background: #f8f9fa;
+        border-color: #0071c2;
+    }
+
+    .form-check-input:checked ~ .form-check-label {
+        color: #0071c2;
+        font-weight: 600;
+    }
+
+    .form-check-label {
+        margin-left: 0.4rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex: 1;
+        font-size: 0.9rem;
+    }
+
+    /* Modal Filter Styling */
+    .filter-modal-body {
+        padding: 1.5rem;
+    }
+
+    .quick-filter-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .quick-filter-btn {
+        padding: 0.75rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+
+    .quick-filter-btn:hover {
+        border-color: #0071c2;
+        background: #f0f8ff;
+    }
+
+    .quick-filter-btn.active {
+        background: #0071c2;
+        color: white;
+        border-color: #0071c2;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<!-- Cabecera de Búsqueda y Filtros (Nuevo Diseño) -->
+<div class="search-header-inmo">
+    <div class="top-bar">
+        <a href="{{ url_for('home') }}" class="back-arrow-inmo"><i class="bi bi-chevron-left"></i></a>
+        <div class="search-box-inmo">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" id="locationSearchInput" placeholder="Buscar lugar" value="{{ current_location_name or '' }}">
+            <input type="hidden" id="selectedLocationId" name="location_id" value="{{ request.args.get('location_id', '') }}">
+            <div id="locationSuggestions" class="autocomplete-suggestions"></div>
+        </div>
+        <a href="#" class="map-button" onclick="toggleView('map'); return false;">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Mapa</span>
+        </a>
+    </div>
+    <div class="filter-pills">
+        <!-- Quick Filter Buttons -->
+        <button class="btn btn-filter-pill" type="button" data-bs-toggle="modal" data-bs-target="#priceFilterModal">
+            <i class="bi bi-currency-euro"></i> Precio
+            {% if request.args.get('min_price') or request.args.get('max_price') %}<span class="filter-badge">1</span>{% endif %}
+        </button>
+        <button class="btn btn-filter-pill" type="button" data-bs-toggle="modal" data-bs-target="#bedFilterModal">
+            <i class="bi bi-bed"></i> Habitaciones
+            {% if request.args.get('rooms') %}<span class="filter-badge">1</span>{% endif %}
+                </button>
+        <button class="btn btn-filter-pill" type="button" data-bs-toggle="modal" data-bs-target="#bathFilterModal">
+            <i class="bi bi-toilet"></i> Baños
+            {% if request.args.get('bathrooms') %}<span class="filter-badge">1</span>{% endif %}
+        </button>
+        <button class="btn btn-filter-pill" type="button" data-bs-toggle="modal" data-bs-target="#propertyTypeModal">
+            <i class="bi bi-house"></i> Tipo
+            {% if request.args.get('property_type') %}<span class="filter-badge">1</span>{% endif %}
+        </button>
+        <button class="btn btn-filter-pill" type="button" data-bs-toggle="collapse" data-bs-target="#moreFiltersCollapse" aria-expanded="false">
+            <i class="bi bi-funnel"></i> Más Filtros
+            {% if active_filters|length > 0 %}<span class="filter-badge">{{ active_filters|length }}</span>{% endif %}
+        </button>
+        {% if active_filters|length > 0 %}
+        <button class="btn btn-filter-pill btn-reset" type="button" onclick="resetAllFilters()">
+            <i class="bi bi-x-circle"></i> Limpiar Filtros
+        </button>
+        {% endif %}
+        {% if session.user_id %}
+        <button class="btn btn-filter-pill btn-save" type="button" onclick="showSaveSearchModal()">
+            <i class="bi bi-heart"></i> Guardar Búsqueda
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- More Filters Section -->
+<div class="collapse mb-3" id="moreFiltersCollapse" style="transition: all 0.3s ease;">
+  <div class="filters-area">
+    <form method="GET" action="{{ url_for('inmobiliaria') }}" id="filterForm">
+        {% if request.args.get('location_id') %}
+            <input type="hidden" name="location_id" value="{{ request.args.get('location_id') }}">
+        {% endif %}
+        {% if selected_cat_id %}
+        <input type="hidden" name="cat_id" value="{{ selected_cat_id }}">
+        {% endif %}
+
+        <h5 class="filter-title"><i class="bi bi-funnel"></i> Más Filtros</h5>
+
+        <!-- First Row: Text Search and Square Meters -->
+        <div class="row g-3 mb-2">
+            <div class="col-md-4">
+                <label class="form-label-sm">Buscar texto</label>
+                <input type="text" class="form-control" name="search_text" id="search_text" 
+                       placeholder="Ej: piso, casa, ático..." 
+                       value="{{ request.args.get('search_text', '') }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-sm">Metros cuadrados (m²)</label>
+                <div class="price-inputs">
+                    <input type="number" step="any" class="form-control" name="min_m2" id="min_m2" 
+                           placeholder="Mín" value="{{ request.args.get('min_m2', '') }}">
+                    <span class="price-separator">-</span>
+                    <input type="number" step="any" class="form-control" name="max_m2" id="max_m2" 
+                           placeholder="Máx" value="{{ request.args.get('max_m2', '') }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-sm">Tipo de anuncio</label>
+                <select class="form-control" name="listing_type" id="listing_type">
+                    <option value="">Todos</option>
+                    <option value="rent" {% if request.args.get('listing_type') == 'rent' %}selected{% endif %}>Alquiler</option>
+                    <option value="sale" {% if request.args.get('listing_type') == 'sale' %}selected{% endif %}>Venta</option>
+                </select>
+            </div>
+        </div>
+            
+        <!-- Second Row: Property Details -->
+        <div class="row g-3 mb-2">
+            <div class="col-md-4">
+                <label class="form-label-sm">Estado de la propiedad</label>
+                <select class="form-control" name="property_state" id="property_state">
+                    <option value="">Todos</option>
+                    <option value="new" {% if request.args.get('property_state') == 'new' %}selected{% endif %}>Nuevo</option>
+                    <option value="good" {% if request.args.get('property_state') == 'good' %}selected{% endif %}>Buen estado</option>
+                    <option value="needs_renovation" {% if request.args.get('property_state') == 'needs_renovation' %}selected{% endif %}>Necesita reforma</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-sm">Tipo de vivienda</label>
+                <select class="form-control" name="housing_type" id="housing_type">
+                    <option value="">Todos</option>
+                    <option value="piso" {% if request.args.get('housing_type') == 'piso' %}selected{% endif %}>Piso</option>
+                    <option value="casa" {% if request.args.get('housing_type') == 'casa' %}selected{% endif %}>Casa</option>
+                    <option value="atico" {% if request.args.get('housing_type') == 'atico' %}selected{% endif %}>Ático</option>
+                    <option value="duplex" {% if request.args.get('housing_type') == 'duplex' %}selected{% endif %}>Dúplex</option>
+                    <option value="estudio" {% if request.args.get('housing_type') == 'estudio' %}selected{% endif %}>Estudio</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-sm">Tipo de anunciante</label>
+                <select class="form-control" name="advertiser_type" id="advertiser_type">
+                    <option value="">Todos</option>
+                    <option value="particular" {% if request.args.get('advertiser_type') == 'particular' %}selected{% endif %}>Particular</option>
+                    <option value="profesional" {% if request.args.get('advertiser_type') == 'profesional' %}selected{% endif %}>Profesional</option>
+                </select>
+            </div>
+        </div>
+            
+        <!-- Features Checkboxes -->
+        <div class="row mb-2">
+            <div class="col-12">
+                <label class="form-label-sm mb-2">Características</label>
+                <div class="features-grid">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_parking" id="has_parking" value="1" {% if request.args.get('has_parking') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_parking">
+                            <i class="bi bi-p-square"></i> Parking
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_pool" id="has_pool" value="1" {% if request.args.get('has_pool') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_pool">
+                            <i class="bi bi-water"></i> Piscina
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_garden" id="has_garden" value="1" {% if request.args.get('has_garden') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_garden">
+                            <i class="bi bi-tree"></i> Jardín
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_terrace" id="has_terrace" value="1" {% if request.args.get('has_terrace') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_terrace">
+                            <i class="bi bi-sun"></i> Terraza
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_elevator" id="has_elevator" value="1" {% if request.args.get('has_elevator') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_elevator">
+                            <i class="bi bi-arrow-up"></i> Ascensor
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_air_conditioning" id="has_air_conditioning" value="1" {% if request.args.get('has_air_conditioning') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_air_conditioning">
+                            <i class="bi bi-snow"></i> Aire acondicionado
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_heating" id="has_heating" value="1" {% if request.args.get('has_heating') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_heating">
+                            <i class="bi bi-fire"></i> Calefacción
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_accessible" id="is_accessible" value="1" {% if request.args.get('is_accessible') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="is_accessible">
+                            <i class="bi bi-wheelchair"></i> Accesible
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="has_storage_room" id="has_storage_room" value="1" {% if request.args.get('has_storage_room') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="has_storage_room">
+                            <i class="bi bi-box"></i> Trastero
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_exterior" id="is_exterior" value="1" {% if request.args.get('is_exterior') == '1' %}checked{% endif %}>
+                        <label class="form-check-label" for="is_exterior">
+                            <i class="bi bi-door-open"></i> Exterior
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Options -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label-sm">Mascotas</label>
+                <select class="form-control" name="pets_allowed" id="pets_allowed">
+                    <option value="">Indiferente</option>
+                    <option value="1" {% if request.args.get('pets_allowed') == '1' %}selected{% endif %}>Sí permitidas</option>
+                    <option value="0" {% if request.args.get('pets_allowed') == '0' %}selected{% endif %}>No permitidas</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label-sm">Amueblado</label>
+                <select class="form-control" name="furnished" id="furnished">
+                    <option value="">Indiferente</option>
+                    <option value="Sí" {% if request.args.get('furnished') == 'Sí' %}selected{% endif %}>Sí</option>
+                    <option value="No" {% if request.args.get('furnished') == 'No' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Apply Filters Button -->
+        <div class="row">
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary search-btn flex-grow-1">
+                    <i class="bi bi-search"></i> Aplicar Filtros
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="resetAllFilters()">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
+
+<!-- Results Header with View Toggle -->
+<div class="results-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+    <h5><i class="bi bi-search"></i> {{ sector.anuncios|length }} anuncios encontrados</h5>
+    {% if session.user_id %}
+    <button class="btn btn-outline-primary btn-sm mt-2" onclick="showSaveSearchModal()">
+        <i class="bi bi-bookmark"></i> Guardar búsqueda
+    </button>
+    {% endif %}
+        </div>
+        <div class="view-controls mt-2">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary view-btn active" data-view="list" onclick="toggleView('list')">
+                    <i class="bi bi-list"></i> Lista
+                </button>
+                <button type="button" class="btn btn-outline-primary view-btn" data-view="map" onclick="toggleView('map')">
+                    <i class="bi bi-geo-alt-fill"></i> Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map View Container (Hidden by default) -->
+<div id="mapViewContainer" class="map-container" style="display: none;">
+    <div id="propertyMap"></div>
+</div>
+
+<!-- Beautiful Results Grid - Same as Autos -->
+<div class="announcements-grid" id="announcementsContainer">
+    {% if sector.anuncios %}
+        {% for anuncio in sector.anuncios %}
+            {% if anuncio.is_commercial is defined and anuncio.is_commercial %}
+                <!-- COMMERCIAL AD -->
+                <div class="announcement-item commercial-ad-item" data-ad-id="{{ anuncio.id }}">
+                    <div class="listing-card commercial-ad-card">
+                        <div class="sponsored-badge">
+                            <i class="bi bi-megaphone-fill"></i> PATROCINADO
+                        </div>
+                        <a href="#" class="commercial-ad-link listing-card-link" data-ad-id="{{ anuncio.id }}" data-target="{{ anuncio.target_url }}">
+                            <div class="listing-image-container">
+                                <img src="{{ anuncio.image_url }}" class="d-block w-100 announcement-image" alt="{{ anuncio.title }}">
+                            </div>
+                            <div class="listing-details">
+                                <h5 class="title"><strong>{{ anuncio.title }}</strong></h5>
+                                <p class="description">{{ anuncio.description }}</p>
+                                <div class="company-info">
+                                    {% if anuncio.company_logo %}
+                                    <img src="{{ anuncio.company_logo }}" alt="{{ anuncio.company_name }}">
+                                    {% endif %}
+                                    <span><strong>{{ anuncio.company_name }}</strong></span>
+                                </div>
+                                <button class="btn btn-primary mt-3" style="width: 100%;">{{ anuncio.call_to_action }}</button>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <!-- REGULAR AD -->
+                <div class="announcement-item"
+                     data-price="{{ anuncio.price or 0 }}" 
+                     data-size="{{ anuncio.square_meters or 0 }}"
+                     data-date="{{ anuncio.published_date.isoformat() if anuncio.published_date else '' }}">
+                    <div class="listing-card">
+                      <a href="{{ url_for('announcement_detail', announcement_id=anuncio.id) }}" class="listing-card-link">
+                        <div class="listing-image-container">
+                            {% if anuncio.images and anuncio.images|length > 0 %}
+                                <img src="{{ anuncio.images[0].image_url }}" class="d-block w-100 announcement-image" alt="{{ anuncio.title }}">
+                            {% else %}
+                                <div class="announcement-image d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                    <i class="bi bi-house" style="font-size: 4rem; color: #0071c2;"></i>
+                                </div>
+                            {% endif %}
+                            {% if anuncio.is_premium %}<span class="badge badge-premium">Premium</span>{% endif %}
+                            {% if anuncio.is_urgent %}<span class="badge badge-urgent">Urgente</span>{% endif %}
+                        </div>
+                        <div class="listing-details">
+                            <h5 class="title">{{ anuncio.title }}</h5>
+                            <div class="price">{% if anuncio.price %}{{ "{:,.0f}".format(anuncio.price).replace(',', '.') }} €{% else %}Precio no disponible{% endif %}</div>
+                            <div class="specs">
+                                {% if anuncio.bedrooms %}<span class="spec-item"><i class="bi bi-bed"></i> {{ anuncio.bedrooms }}</span>{% endif %}
+                                {% if anuncio.bathrooms %}<span class="spec-item"><i class="bi bi-toilet"></i> {{ anuncio.bathrooms }}</span>{% endif %}
+                                {% if anuncio.square_meters %}<span class="spec-item"><i class="bi bi-rulers"></i> {{ anuncio.square_meters }} m²</span>{% endif %}
+                            </div>
+                            <div class="location">
+                                <i class="bi bi-geo-alt-fill"></i> {{ anuncio.location.name if anuncio.location else 'N/A' }}
+                            </div>
+                        </div>
+                      </a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="no-results text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <h4 class="mt-3">No se encontraron anuncios</h4>
+                <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+                <button class="btn btn-primary" onclick="clearFilters()">Limpiar filtros</button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Filter Modals -->
+<!-- Price Filter Modal -->
+<div class="modal fade" id="priceFilterModal" tabindex="-1" aria-labelledby="priceFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="priceFilterModalLabel">Filtrar por Precio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body filter-modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Rango de precio (€)</label>
+                    <div class="price-inputs">
+                        <input type="number" step="any" class="form-control" id="modal_min_price" 
+                               placeholder="Mín" value="{{ request.args.get('min_price', '') }}">
+                        <span class="price-separator">-</span>
+                        <input type="number" step="any" class="form-control" id="modal_max_price" 
+                               placeholder="Máx" value="{{ request.args.get('max_price', '') }}">
+                    </div>
+                </div>
+                <div class="quick-filter-buttons">
+                    <div class="quick-filter-btn" onclick="setPriceRange(0, 500)">Hasta 500€</div>
+                    <div class="quick-filter-btn" onclick="setPriceRange(500, 1000)">500-1000€</div>
+                    <div class="quick-filter-btn" onclick="setPriceRange(1000, 2000)">1000-2000€</div>
+                    <div class="quick-filter-btn" onclick="setPriceRange(2000, 3000)">2000-3000€</div>
+                    <div class="quick-filter-btn" onclick="setPriceRange(3000, 5000)">3000-5000€</div>
+                    <div class="quick-filter-btn" onclick="setPriceRange(5000, null)">+5000€</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="applyPriceFilter()">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bedrooms Filter Modal -->
+<div class="modal fade" id="bedFilterModal" tabindex="-1" aria-labelledby="bedFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bedFilterModalLabel">Número de Habitaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body filter-modal-body">
+                <div class="quick-filter-buttons">
+                    <div class="quick-filter-btn" onclick="setBedrooms(1)">1+</div>
+                    <div class="quick-filter-btn" onclick="setBedrooms(2)">2+</div>
+                    <div class="quick-filter-btn" onclick="setBedrooms(3)">3+</div>
+                    <div class="quick-filter-btn" onclick="setBedrooms(4)">4+</div>
+                    <div class="quick-filter-btn" onclick="setBedrooms(5)">5+</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="applyBedFilter()">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bathrooms Filter Modal -->
+<div class="modal fade" id="bathFilterModal" tabindex="-1" aria-labelledby="bathFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bathFilterModalLabel">Número de Baños</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body filter-modal-body">
+                <div class="quick-filter-buttons">
+                    <div class="quick-filter-btn" onclick="setBathrooms(1)">1+</div>
+                    <div class="quick-filter-btn" onclick="setBathrooms(2)">2+</div>
+                    <div class="quick-filter-btn" onclick="setBathrooms(3)">3+</div>
+                    <div class="quick-filter-btn" onclick="setBathrooms(4)">4+</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="applyBathFilter()">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Property Type Filter Modal -->
+<div class="modal fade" id="propertyTypeModal" tabindex="-1" aria-labelledby="propertyTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="propertyTypeModalLabel">Tipo de Propiedad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body filter-modal-body">
+                <div class="quick-filter-buttons">
+                    <div class="quick-filter-btn" onclick="setPropertyType('piso')">Piso</div>
+                    <div class="quick-filter-btn" onclick="setPropertyType('casa')">Casa</div>
+                    <div class="quick-filter-btn" onclick="setPropertyType('atico')">Ático</div>
+                    <div class="quick-filter-btn" onclick="setPropertyType('duplex')">Dúplex</div>
+                    <div class="quick-filter-btn" onclick="setPropertyType('estudio')">Estudio</div>
+                    <div class="quick-filter-btn" onclick="setPropertyType('chalet')">Chalet</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="applyPropertyTypeFilter()">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Search Modal -->
+{% if session.user_id %}
+<div class="modal fade" id="saveSearchModal" tabindex="-1" aria-labelledby="saveSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveSearchModalLabel">Guardar Búsqueda</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="searchName" class="form-label">Nombre de la búsqueda</label>
+                    <input type="text" class="form-control" id="searchName" placeholder="Ej: Pisos en Madrid centro">
+                </div>
+                <div class="mb-3">
+                    <label for="searchDescription" class="form-label">Descripción (opcional)</label>
+                    <textarea class="form-control" id="searchDescription" rows="3" placeholder="Describe qué tipo de propiedad buscas..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveCurrentSearch()">
+                    <i class="bi bi-bookmark"></i> Guardar Búsqueda
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Bottom Navigation -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Commercial Ads Tracking
+document.querySelectorAll('.commercial-ad-item').forEach(adItem => {
+    const adId = adItem.dataset.adId;
+    fetch(`/api/commercial-ads/${adId}/view`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).catch(err => console.log('View tracking error:', err));
+});
+
+document.querySelectorAll('.commercial-ad-link').forEach(link => {
+    link.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const adId = this.dataset.adId;
+        const targetUrl = this.dataset.target;
+        try {
+            await fetch(`/api/commercial-ads/${adId}/click`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            window.open(targetUrl, '_blank');
+        } catch (error) {
+            console.error('Click tracking error:', error);
+            window.open(targetUrl, '_blank');
+        }
+    });
+});
+
+// Location search functionality
+let map;
+let markers = [];
+let locationSearchTimeout;
+let currentView = 'list';
+
+// Location input is pre-filled from template if location_id is in URL
+
+// Initialize location autocomplete
+document.getElementById('locationSearchInput').addEventListener('input', function() {
+    const query = this.value.trim();
+    const suggestionsDiv = document.getElementById('locationSuggestions');
+    
+    clearTimeout(locationSearchTimeout);
+    
+    if (query.length < 2) {
+        suggestionsDiv.innerHTML = '';
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    locationSearchTimeout = setTimeout(() => {
+        fetch(`/api/ubicaciones/buscar?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsDiv.innerHTML = '';
+                if (data.length > 0) {
+                    suggestionsDiv.style.display = 'block';
+                    data.forEach(location => {
+                        const item = document.createElement('div');
+                        item.className = 'autocomplete-item';
+                        item.textContent = location.name;
+                        item.onclick = () => {
+                            document.getElementById('locationSearchInput').value = location.name;
+                            document.getElementById('selectedLocationId').value = location.id;
+                            suggestionsDiv.style.display = 'none';
+                            // Update URL with location_id
+                            const url = new URL(window.location);
+                            url.searchParams.set('location_id', location.id);
+                            window.location.href = url.toString();
+                        };
+                        suggestionsDiv.appendChild(item);
+                    });
+                } else {
+                    suggestionsDiv.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error searching locations:', error);
+                suggestionsDiv.style.display = 'none';
+            });
+    }, 300);
+});
+
+// Close suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    const suggestionsDiv = document.getElementById('locationSuggestions');
+    const input = document.getElementById('locationSearchInput');
+    if (!input.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+        suggestionsDiv.style.display = 'none';
+    }
+});
+
+// Toggle between list and map view
+function toggleView(view) {
+    currentView = view;
+    const listContainer = document.getElementById('announcementsContainer');
+    const mapContainer = document.getElementById('mapViewContainer');
+    const viewButtons = document.querySelectorAll('.view-btn');
+    
+    viewButtons.forEach(btn => {
+        if (btn.dataset.view === view) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    if (view === 'map') {
+        listContainer.style.display = 'none';
+        mapContainer.style.display = 'block';
+        initMap();
+    } else {
+        listContainer.style.display = 'grid';
+        mapContainer.style.display = 'none';
+    }
+}
+
+// Initialize map with property markers
+function initMap() {
+    if (map) {
+        // Clear existing markers
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+    } else {
+        // Initialize map - will be centered after loading properties
+        map = L.map('propertyMap').setView([40.4168, -3.7038], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+    }
+    
+    // Get properties coordinates
+    const urlParams = new URLSearchParams(window.location.search);
+    console.log('📍 Fetching properties for map with params:', urlParams.toString());
+    fetch(`/api/properties/coordinates?${urlParams.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('📍 Map API response:', data);
+            if (data.success && data.properties.length > 0) {
+                console.log(`📍 Found ${data.properties.length} properties with coordinates`);
+                const bounds = [];
+                
+                data.properties.forEach(property => {
+                    if (property.latitude && property.longitude) {
+                        // Format price for marker (e.g., 475000 -> "475K", 1200000 -> "1.2M")
+                        let priceText = '';
+                        if (property.price) {
+                            if (property.price >= 1000000) {
+                                priceText = (property.price / 1000000).toFixed(1).replace('.0', '') + 'M';
+                            } else if (property.price >= 1000) {
+                                priceText = Math.round(property.price / 1000) + 'K';
+                            } else {
+                                priceText = property.price.toString();
+                            }
+                        }
+                        
+                        // Create custom marker icon with price
+                        const markerHtml = `
+                            <div style="
+                                background: #0071c2;
+                                color: white;
+                                border: 3px solid white;
+                                border-radius: 50%;
+                                width: 50px;
+                                height: 50px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: 700;
+                                font-size: 0.85rem;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                                cursor: pointer;
+                                text-align: center;
+                                line-height: 1.1;
+                                padding: 2px;
+                                pointer-events: auto;
+                                position: relative;
+                                z-index: 1000;
+                            ">${priceText || '€'}</div>
+                        `;
+                        
+                        const customIcon = L.divIcon({
+                            html: markerHtml,
+                            className: 'custom-price-marker',
+                            iconSize: [50, 50],
+                            iconAnchor: [25, 25],
+                            popupAnchor: [0, -25]
+                        });
+                        
+                        const marker = L.marker([property.latitude, property.longitude], {
+                            icon: customIcon,
+                            riseOnHover: false,  // Disable default hover behavior that might cause issues
+                            keyboard: true,
+                            interactive: true  // Ensure marker is interactive
+                        });
+                        
+                        // Add marker to map
+                        marker.addTo(map);
+                        
+                        // Store marker for cleanup
+                        markers.push(marker);
+                        
+                        // Create popup content with property image
+                        let imageUrl = '';
+                        if (property.image_url) {
+                            imageUrl = property.image_url;
+                        }
+                        
+                        const popupContent = `
+                            <div class="map-popup">
+                                ${property.id && property.id !== 'commercial' ? `
+                                    <a href="/anuncio/${property.id}" style="text-decoration: none; color: inherit; display: block;">
+                                ` : ''}
+                                ${imageUrl ? `
+                                    <div class="map-popup-image" style="background-image: url('${imageUrl}'); background-size: cover; background-position: center; height: 160px;">
+                                    </div>
+                                ` : `
+                                    <div class="map-popup-image" style="background: linear-gradient(135deg, #0071c2 0%, #00a5e5 100%); height: 160px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-house" style="font-size: 3rem; color: white;"></i>
+                                    </div>
+                                `}
+                                <div class="map-popup-content">
+                                    <h6>${property.title || 'Sin título'}</h6>
+                                    <div class="map-popup-price">${property.price ? property.price.toLocaleString('es-ES') + ' €' : 'Precio no disponible'}</div>
+                                    <div class="map-popup-details">${property.address || property.title || 'Ubicación no especificada'}</div>
+                                    <div class="map-popup-specs">
+                                        ${property.rooms ? `<span><i class="bi bi-door-open"></i> ${property.rooms}</span>` : ''}
+                                        ${property.bathrooms ? `<span><i class="bi bi-droplet"></i> ${property.bathrooms}</span>` : ''}
+                                        ${property.square_meters ? `<span><i class="bi bi-rulers"></i> ${property.square_meters} m²</span>` : ''}
+                                    </div>
+                                    ${property.id && property.id !== 'commercial' ? `
+                                        <button class="btn btn-primary btn-sm w-100" style="background: linear-gradient(135deg, #0071c2, #00a5e5); border: none; margin-top: 0.5rem;">Ver detalles</button>
+                                    </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Bind popup with proper options
+                        marker.bindPopup(popupContent, {
+                            closeOnClick: false,
+                            autoClose: true,  // Close other popups when opening new one
+                            closeButton: true,
+                            maxWidth: 300,
+                            minWidth: 280,
+                            className: 'property-popup',
+                            offset: [0, -25]
+                        });
+                        
+                        // Ensure marker stays visible and is clickable
+                        marker.on('click', function(e) {
+                            // Stop event propagation to prevent map click
+                            if (e.originalEvent) {
+                                e.originalEvent.stopPropagation();
+                            }
+                            this.openPopup();
+                            // Bring marker to front
+                            this.setZIndexOffset(2000);
+                        });
+                        
+                        // Handle hover - keep marker visible
+                        marker.on('mouseover', function(e) {
+                            // Bring marker to front on hover
+                            this.setZIndexOffset(1000);
+                            this.setOpacity(1.0);
+                        });
+                        
+                        marker.on('mouseout', function(e) {
+                            // Keep marker visible (don't reset z-index completely)
+                            this.setOpacity(1.0);
+                        });
+                        
+                        // When popup opens, ensure marker stays on top
+                        marker.on('popupopen', function(e) {
+                            this.setZIndexOffset(2000);
+                        });
+                        
+                        bounds.push([property.latitude, property.longitude]);
+                    }
+                });
+                
+                if (bounds.length > 0) {
+                    // Fit map to show all property markers
+                    const group = new L.featureGroup(markers);
+                    map.fitBounds(group.getBounds().pad(0.1), { padding: [50, 50], maxZoom: 15 });
+                    console.log(`📍 Map centered on ${bounds.length} properties`);
+                } else {
+                    console.warn('⚠️ No properties with valid coordinates found');
+                    // Center on Spain if no properties
+                    map.setView([40.4168, -3.7038], 6);
+                }
+            } else {
+                console.warn('⚠️ No properties returned from API');
+                if (data.message) {
+                    console.warn('API message:', data.message);
+                }
+                // Center on Spain if no properties
+                map.setView([40.4168, -3.7038], 6);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error loading map:', error);
+        });
+}
+
+// Quick Filter Functions
+let selectedBedrooms = null;
+let selectedBathrooms = null;
+let selectedPropertyType = null;
+
+function setPriceRange(min, max) {
+    document.getElementById('modal_min_price').value = min || '';
+    document.getElementById('modal_max_price').value = max || '';
+    // Highlight the selected button
+    const btn = event.target;
+    btn.parentElement.querySelectorAll('.quick-filter-btn').forEach(b => {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+}
+
+// Initialize price modal when opened
+document.getElementById('priceFilterModal')?.addEventListener('show.bs.modal', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    document.getElementById('modal_min_price').value = urlParams.get('min_price') || '';
+    document.getElementById('modal_max_price').value = urlParams.get('max_price') || '';
+});
+
+function applyPriceFilter() {
+    const minPrice = document.getElementById('modal_min_price').value;
+    const maxPrice = document.getElementById('modal_max_price').value;
+    const url = new URL(window.location);
+    if (minPrice) url.searchParams.set('min_price', minPrice);
+    else url.searchParams.delete('min_price');
+    if (maxPrice) url.searchParams.set('max_price', maxPrice);
+    else url.searchParams.delete('max_price');
+    window.location.href = url.toString();
+}
+
+function setBedrooms(num) {
+    selectedBedrooms = num;
+    // Highlight the selected button
+    const btn = event.target;
+    btn.parentElement.querySelectorAll('.quick-filter-btn').forEach(b => {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+}
+
+// Initialize bed modal when opened
+document.getElementById('bedFilterModal')?.addEventListener('show.bs.modal', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentRooms = urlParams.get('rooms');
+    selectedBedrooms = currentRooms ? parseInt(currentRooms) : null;
+    // Highlight current selection
+    this.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(currentRooms)) {
+            btn.classList.add('active');
+        }
+    });
+});
+
+function applyBedFilter() {
+    const url = new URL(window.location);
+    if (selectedBedrooms) url.searchParams.set('rooms', selectedBedrooms);
+    else url.searchParams.delete('rooms');
+    window.location.href = url.toString();
+}
+
+function setBathrooms(num) {
+    selectedBathrooms = num;
+    // Highlight the selected button
+    const btn = event.target;
+    btn.parentElement.querySelectorAll('.quick-filter-btn').forEach(b => {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+}
+
+// Initialize bath modal when opened
+document.getElementById('bathFilterModal')?.addEventListener('show.bs.modal', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentBathrooms = urlParams.get('bathrooms');
+    selectedBathrooms = currentBathrooms ? parseInt(currentBathrooms) : null;
+    // Highlight current selection
+    this.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(currentBathrooms)) {
+            btn.classList.add('active');
+        }
+    });
+});
+
+function applyBathFilter() {
+    const url = new URL(window.location);
+    if (selectedBathrooms) url.searchParams.set('bathrooms', selectedBathrooms);
+    else url.searchParams.delete('bathrooms');
+    window.location.href = url.toString();
+}
+
+function setPropertyType(type) {
+    selectedPropertyType = type;
+    // Highlight the selected button
+    const btn = event.target;
+    btn.parentElement.querySelectorAll('.quick-filter-btn').forEach(b => {
+        b.classList.remove('active');
+    });
+    btn.classList.add('active');
+}
+
+// Initialize property type modal when opened
+document.getElementById('propertyTypeModal')?.addEventListener('show.bs.modal', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentType = urlParams.get('property_type');
+    selectedPropertyType = currentType || null;
+    // Highlight current selection
+    this.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase().includes(currentType?.toLowerCase() || '')) {
+            btn.classList.add('active');
+        }
+    });
+});
+
+function applyPropertyTypeFilter() {
+    const url = new URL(window.location);
+    if (selectedPropertyType) url.searchParams.set('property_type', selectedPropertyType);
+    else url.searchParams.delete('property_type');
+    window.location.href = url.toString();
+}
+
+// Reset all filters
+function resetAllFilters() {
+    window.location.href = "{{ url_for('inmobiliaria') }}";
+}
+
+// Clear filters function (legacy)
+function clearFilters() {
+    resetAllFilters();
+}
+
+// Save Search Modal
+function showSaveSearchModal() {
+    const modal = new bootstrap.Modal(document.getElementById('saveSearchModal'));
+    modal.show();
+}
+
+// Save current search
+function saveCurrentSearch() {
+    const searchName = document.getElementById('searchName').value.trim();
+    const searchDescription = document.getElementById('searchDescription').value.trim();
+    
+    if (!searchName) {
+        alert('Por favor, introduce un nombre para la búsqueda');
+        return;
+    }
+    
+    // Get all current search criteria from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchCriteria = {
+        search_text: urlParams.get('search_text') || '',
+        location: document.getElementById('locationSearchInput').value || '',
+        location_id: urlParams.get('location_id') || '',
+        min_price: urlParams.get('min_price') || '',
+        max_price: urlParams.get('max_price') || '',
+        property_type: urlParams.get('property_type') || '',
+        min_rooms: urlParams.get('rooms') || '',
+        min_bathrooms: urlParams.get('bathrooms') || '',
+        min_m2: urlParams.get('min_m2') || '',
+        max_m2: urlParams.get('max_m2') || '',
+        listing_type: urlParams.get('listing_type') || '',
+        features: {}
+    };
+    
+    // Add checkbox features
+    ['has_pool', 'has_parking', 'has_air_conditioning', 'has_heating', 
+     'has_fitted_wardrobes', 'has_elevator', 'has_terrace', 'is_exterior', 
+     'has_garden', 'has_storage_room', 'is_accessible'].forEach(feature => {
+        if (urlParams.get(feature) === '1') {
+            searchCriteria.features[feature] = true;
+        }
+    });
+    
+    // Send to backend
+    fetch('/api/save-search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            search_name: searchName,
+            search_criteria: searchCriteria
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Búsqueda guardada exitosamente');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('saveSearchModal'));
+            modal.hide();
+            // Clear form
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchDescription').value = '';
+        } else {
+            alert('Error al guardar la búsqueda: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar la búsqueda');
+    });
+}
+
+// Filter pills functionality
+document.querySelectorAll('.remove-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const filterKey = this.dataset.filterKey;
+        // Remove filter from URL and reload
+        const url = new URL(window.location);
+        url.searchParams.delete(filterKey);
+        window.location.href = url.toString();
+    });
+});
+</script>
+{% endblock %}

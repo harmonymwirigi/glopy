@@ -1,0 +1,329 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .payment-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .payment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .payment-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-succeeded {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-failed {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-canceled {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .admin-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .nav-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .nav-item:hover {
+        background: #f8f9fa;
+        color: #667eea;
+        text-decoration: none;
+    }
+    
+    .nav-item.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .search-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .payment-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .icon-success { background: #28a745; }
+    .icon-pending { background: #ffc107; }
+    .icon-failed { background: #dc3545; }
+    .icon-canceled { background: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-credit-card"></i> Gestión de Pagos
+                </h1>
+                <p class="mb-0 opacity-75">Monitorea todos los pagos y transacciones</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Admin Navigation -->
+        <div class="col-md-3">
+            <div class="admin-nav">
+                <h5 class="mb-3">Navegación</h5>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="nav-item">
+                    <i class="bi bi-people"></i> Usuarios
+                </a>
+                <a href="{{ url_for('admin_ads') }}" class="nav-item">
+                    <i class="bi bi-house-door"></i> Anuncios
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="nav-item">
+                    <i class="bi bi-tags"></i> Categorías
+                </a>
+                <a href="{{ url_for('admin_pricing') }}" class="nav-item">
+                    <i class="bi bi-currency-euro"></i> Precios
+                </a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-item active">
+                    <i class="bi bi-credit-card"></i> Pagos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Payment Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ payments.total }}</div>
+                        <div class="stats-label">Total Pagos</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ payments.items|selectattr('status', 'equalto', 'succeeded')|list|length }}</div>
+                        <div class="stats-label">Exitosos</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ payments.items|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                        <div class="stats-label">Pendientes</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-number">€{{ "%.2f"|format(payments.items|selectattr('status', 'equalto', 'succeeded')|sum(attribute='amount')) }}</div>
+                        <div class="stats-label">Ingresos</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search and Filter Box -->
+            <div class="search-box">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Buscar por ID de pago o usuario..." 
+                               value="{{ search }}">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="status">
+                            <option value="">Todos los estados</option>
+                            <option value="succeeded" {% if status == 'succeeded' %}selected{% endif %}>Exitosos</option>
+                            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pendientes</option>
+                            <option value="failed" {% if status == 'failed' %}selected{% endif %}>Fallidos</option>
+                            <option value="canceled" {% if status == 'canceled' %}selected{% endif %}>Cancelados</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Payments List -->
+            {% for payment in payments.items %}
+            <div class="payment-card">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="payment-icon {% if payment.status == 'succeeded' %}icon-success{% elif payment.status == 'pending' %}icon-pending{% elif payment.status == 'failed' %}icon-failed{% else %}icon-canceled{% endif %}">
+                            <i class="bi bi-credit-card"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="mb-1">Pago #{{ payment.id }}</h5>
+                                <p class="text-muted mb-1">{{ payment.description or 'Pago de anuncio premium' }}</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="payment-status status-{{ payment.status }}">
+                                        {{ payment.status }}
+                                    </span>
+                                    {% if payment.payment_method %}
+                                    <span class="badge bg-secondary">{{ payment.payment_method }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-end">
+                                    <h4 class="mb-1 text-success">€{{ "%.2f"|format(payment.amount) }}</h4>
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-calendar"></i> {{ payment.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </p>
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-person"></i> Usuario ID: {{ payment.user_id }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not payments.items %}
+            <div class="text-center py-5">
+                <i class="bi bi-credit-card" style="font-size: 4rem; color: #dee2e6;"></i>
+                <h4 class="text-muted mt-3">No hay pagos</h4>
+                <p class="text-muted">Los pagos aparecerán aquí cuando los usuarios realicen transacciones</p>
+            </div>
+            {% endif %}
+            
+            <!-- Pagination -->
+            {% if payments.pages > 1 %}
+            <nav aria-label="Paginación de pagos">
+                <ul class="pagination justify-content-center">
+                    {% if payments.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_payments', page=payments.prev_num, search=search, status=status) }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in payments.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != payments.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_payments', page=page_num, search=search, status=status) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if payments.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_payments', page=payments.next_num, search=search, status=status) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    
+    <!-- Sección Superior (Hero) -->
+    <div class="home-hero">
+        <img src="{{ url_for('static', filename='Animaciones_Glopy/Accion_interactuar_Glopy_GIF.gif') }}" alt="Glopy Mascot" class="home-mascot">
+
+        <div class="home-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="¿Qué buscas hoy?">
+            <i class="bi bi-geo-alt-fill location-icon"></i>
+        </div>
+
+        <button class="btn btn-buscar">Buscar</button>
+    </div>
+    
+    <!-- Hoja de Contenido Inferior -->
+    <div class="home-content-sheet">
+        <!-- Categorías -->
+        <div class="section-container">
+            <div class="section-header">
+                <h3 class="section-title">Explora nuestras categorías</h3>
+                <a href="#" class="section-link">Ver todas</a>
+            </div>
+            <div class="row row-cols-2 g-3">
+                <!-- Inmobiliaria -->
+                <div class="col">
+                    <a href="{{ url_for('inmobiliaria') }}">
+                        <div class="recent-search-card category-card">
+                            <img src="{{ url_for('static', filename='images/inmobiliaria.jpg') }}" alt="Inmobiliaria">
+                            <div class="category-overlay">
+                                <h6>🏠 Inmobiliaria</h6>
+                                <small>Casas, pisos, locales</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Coches -->
+                <div class="col">
+                    <a href="{{ url_for('coches') }}">
+                        <div class="recent-search-card category-card">
+                            <img src="{{ url_for('static', filename='images/coches.jpg') }}" alt="Coches">
+                            <div class="category-overlay">
+                                <h6>🚗 Coches</h6>
+                                <small>Vehiculos nuevos y usados</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Electronica -->
+                <div class="col">
+                    <a href="{{ url_for('electronica') }}">
+                        <div class="recent-search-card category-card">
+                            <img src="{{ url_for('static', filename='images/tecnologia.jpg') }}" alt="Electronica">
+                            <div class="category-overlay">
+                                <h6>📱 Electronica</h6>
+                                <small>Tecnologia y dispositivos</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Motos -->
+                <div class="col">
+                    <a href="#">
+                        <div class="recent-search-card category-card">
+                            <img src="{{ url_for('static', filename='images/image_moto1.jpg') }}" alt="Motos">
+                            <div class="category-overlay">
+                                <h6>🏍️ Motos</h6>
+                                <small>Proximamente</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Servicios -->
+                <div class="col">
+                    <a href="#">
+                        <div class="recent-search-card category-card">
+                            <div class="category-icon-placeholder">
+                                <i class="bi bi-tools" style="font-size: 3rem; color: #e91e63;"></i>
+                            </div>
+                            <div class="category-overlay">
+                                <h6>🔧 Servicios</h6>
+                                <small>Proximamente</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Empleo -->
+                <div class="col">
+                    <a href="#">
+                        <div class="recent-search-card category-card">
+                            <div class="category-icon-placeholder">
+                                <i class="bi bi-briefcase" style="font-size: 3rem; color: #00695c;"></i>
+                            </div>
+                            <div class="category-overlay">
+                                <h6>💼 Empleo</h6>
+                                <small>Proximamente</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="section-container mt-4">
+            <div class="text-center">
+                <h4>¿No encuentras lo que buscas?</h4>
+                <p class="text-muted">Usa nuestro buscador avanzado</p>
+                <a href="{{ url_for('buscador') }}" class="btn btn-primary btn-lg">Buscar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de navegación inferior -->
+{% include 'bottom_nav.html' %}
+
+<style>
+.category-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+}
+
+.category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.category-overlay h6 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.category-overlay small {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.category-icon-placeholder {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    border-radius: 15px 15px 0 0;
+}
+
+.recent-search-card.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}

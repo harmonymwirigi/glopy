@@ -1,0 +1,327 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .ad-preview {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .ad-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .company-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Estadísticas del Anuncio
+                </h1>
+                <p class="mb-0 opacity-75">{{ ad.title }}</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('admin_edit_commercial_ad', ad_id=ad.id) }}" class="btn btn-light me-2">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a href="{{ url_for('admin_commercial_ads') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Ad Preview -->
+    <div class="ad-preview">
+        <div class="row">
+            <div class="col-md-8">
+                <h3>{{ ad.title }}</h3>
+                <p class="text-muted">{{ ad.description }}</p>
+                <div class="d-flex align-items-center mb-3">
+                    {% if ad.company_logo %}
+                    <img src="{{ ad.company_logo }}" alt="{{ ad.company_name }}" class="company-logo me-3">
+                    {% endif %}
+                    <div>
+                        <strong>{{ ad.company_name }}</strong>
+                        <br>
+                        <small class="text-muted">
+                            {% if ad.contact_email %}{{ ad.contact_email }}{% endif %}
+                            {% if ad.contact_phone %} | {{ ad.contact_phone }}{% endif %}
+                        </small>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge bg-{{ 'success' if ad.status == 'active' else 'warning' }}">{{ ad.status|upper }}</span>
+                    <span class="badge bg-secondary">Prioridad: {{ ad.priority }}</span>
+                    <span class="badge bg-info">Cada {{ ad.placement_frequency }} anuncios</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                {% if ad.image_url %}
+                <img src="{{ ad.image_url }}" alt="{{ ad.title }}" class="ad-image">
+                {% endif %}
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <small class="text-muted"><i class="bi bi-calendar"></i> Inicio: {{ ad.start_date.strftime('%d/%m/%Y %H:%M') }}</small>
+            </div>
+            <div class="col-md-6">
+                <small class="text-muted"><i class="bi bi-calendar"></i> Fin: {{ ad.end_date.strftime('%d/%m/%Y %H:%M') }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-number">{{ ad.views_count }}</div>
+                <div class="stat-label"><i class="bi bi-eye"></i> Visualizaciones</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-number">{{ ad.clicks_count }}</div>
+                <div class="stat-label"><i class="bi bi-mouse"></i> Clics</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-number">{{ "%.2f"|format(ad.get_ctr()) }}%</div>
+                <div class="stat-label"><i class="bi bi-graph-up"></i> CTR</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-number">€{{ "%.2f"|format(ad.price_paid if ad.price_paid else 0) }}</div>
+                <div class="stat-label"><i class="bi bi-cash"></i> Precio Pagado</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Views Chart -->
+    <div class="chart-container">
+        <h5 class="mb-4"><i class="bi bi-eye"></i> Visualizaciones por Día (Últimos 30 días)</h5>
+        <canvas id="viewsChart" height="80"></canvas>
+    </div>
+    
+    <!-- Clicks Chart -->
+    <div class="chart-container">
+        <h5 class="mb-4"><i class="bi bi-mouse"></i> Clics por Día (Últimos 30 días)</h5>
+        <canvas id="clicksChart" height="80"></canvas>
+    </div>
+    
+    <!-- Additional Info -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6><i class="bi bi-info-circle"></i> Información Adicional</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>URL de destino:</strong></td>
+                        <td><a href="{{ ad.target_url }}" target="_blank">{{ ad.target_url }}</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Botón de acción:</strong></td>
+                        <td>{{ ad.call_to_action }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Última vez mostrado:</strong></td>
+                        <td>{{ ad.last_shown_at.strftime('%d/%m/%Y %H:%M') if ad.last_shown_at else 'Nunca' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Creado por:</strong></td>
+                        <td>{{ ad.created_by.name if ad.created_by else 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fecha de creación:</strong></td>
+                        <td>{{ ad.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6><i class="bi bi-wallet2"></i> Información de Pago</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Precio pagado:</strong></td>
+                        <td>€{{ "%.2f"|format(ad.price_paid if ad.price_paid else 0) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Referencia:</strong></td>
+                        <td>{{ ad.payment_reference or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPM (Costo por 1000 vistas):</strong></td>
+                        <td>
+                            {% if ad.views_count > 0 and ad.price_paid %}
+                                €{{ "%.2f"|format((ad.price_paid / ad.views_count) * 1000) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPC (Costo por clic):</strong></td>
+                        <td>
+                            {% if ad.clicks_count > 0 and ad.price_paid %}
+                                €{{ "%.2f"|format(ad.price_paid / ad.clicks_count) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    {% if ad.notes %}
+    <div class="chart-container">
+        <h6><i class="bi bi-sticky"></i> Notas Internas</h6>
+        <p>{{ ad.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Prepare data for charts
+const viewsData = {{ views_by_date|tojson }};
+const clicksData = {{ clicks_by_date|tojson }};
+
+// Process views data
+const viewsDates = viewsData.map(item => item.date).reverse();
+const viewsCounts = viewsData.map(item => item.count).reverse();
+
+// Process clicks data
+const clicksDates = clicksData.map(item => item.date).reverse();
+const clicksCounts = clicksData.map(item => item.count).reverse();
+
+// Views Chart
+const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+new Chart(viewsCtx, {
+    type: 'line',
+    data: {
+        labels: viewsDates,
+        datasets: [{
+            label: 'Visualizaciones',
+            data: viewsCounts,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
+// Clicks Chart
+const clicksCtx = document.getElementById('clicksChart').getContext('2d');
+new Chart(clicksCtx, {
+    type: 'bar',
+    data: {
+        labels: clicksDates,
+        datasets: [{
+            label: 'Clics',
+            data: clicksCounts,
+            backgroundColor: '#4caf50',
+            borderColor: '#45a049',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+

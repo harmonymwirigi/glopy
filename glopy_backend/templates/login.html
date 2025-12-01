@@ -1,0 +1,141 @@
+﻿{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-top-nav">
+    <a href="#" class="auth-icon-btn">
+      <i class="bi bi-question-circle"></i>
+    </a>
+    <a href="{{ url_for('home') }}" class="auth-icon-btn">
+      <i class="bi bi-x-lg"></i>
+    </a>
+  </div>
+
+  <div class="auth-box">
+    <div class="auth-header">
+      <img src="{{ url_for('static', filename='Accion_interactuar_Glopy_GIF.gif') }}" alt="Glopy Mascot" class="mascot">
+      <img src="{{ url_for('static', filename='LOGOS/Logo_Tipografia.png') }}" alt="Glopy Logo" class="logo-glopy">
+      <p>Inicia sesión para continuar</p>
+    </div>
+
+    <div id="login-message" class="alert d-none" role="alert"></div>
+
+    <!-- OAuth Login Buttons -->
+    <div class="oauth-buttons mb-4">
+      <a href="{{ url_for('oauth.login_google') }}" class="btn btn-oauth btn-google w-100 mb-2">
+        <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuar con Google
+      </a>
+      
+      <a href="{{ url_for('oauth.login_facebook') }}" class="btn btn-oauth btn-facebook w-100 mb-2">
+        <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+        Continuar con Facebook
+      </a>
+      
+      <a href="{{ url_for('oauth.login_microsoft') }}" class="btn btn-oauth btn-microsoft w-100 mb-3">
+        <svg class="oauth-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#f25022" d="M0 0h11.377v11.372H0z"/>
+          <path fill="#00a4ef" d="M12.623 0H24v11.372H12.623z"/>
+          <path fill="#7fba00" d="M0 12.628h11.377V24H0z"/>
+          <path fill="#ffb900" d="M12.623 12.628H24V24H12.623z"/>
+        </svg>
+        Continuar con Microsoft
+      </a>
+    </div>
+    
+    <div class="divider mb-4">
+      <span>o continuar con email</span>
+    </div>
+
+    <!-- Formulario de login real (POST a /auth/login) -->
+    <form action="{{ url_for('auth_login') }}" method="POST" class="w-100">
+      <div class="form-group-auth mb-3">
+        <label for="email" class="form-label">EMAIL</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="tu@email.com" required>
+      </div>
+      <div class="form-group-auth mb-4">
+        <label for="password" class="form-label">CONTRASEÑA</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="********" required>
+      </div>
+      <button type="submit" class="btn btn-auth-primary w-100">Iniciar sesión</button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="#">¿Olvidaste la contraseña?</a>
+      <a href="{{ url_for('register') }}">Registrarse</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block title %}{% endblock %}
+{% block scripts %}
+<script>
+  (function() {
+    const form = document.querySelector('.auth-box form');
+    const msgEl = document.getElementById('login-message');
+    function showMsg(text, variant) {
+      if (!msgEl) return;
+      msgEl.textContent = text || '';
+      msgEl.className = 'alert ' + (variant ? ('alert-' + variant) : 'alert-info');
+      msgEl.classList.remove('d-none');
+      msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = (document.getElementById('email')?.value || '').trim();
+      const password = document.getElementById('password')?.value || '';
+      const submitBtn = form.querySelector('[type=submit]');
+      const originalText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Entrando…'; }
+      try {
+        const res = await fetch("{{ url_for('auth_login') }}", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ email, password })
+        });
+        const ct = res.headers.get('content-type') || '';
+        if (res.ok) {
+          if (ct.includes('application/json')) {
+            const data = await res.json();
+            const next = data.next || "{{ url_for('home') }}";
+            window.location = next;
+          } else {
+            window.location = "{{ url_for('home') }}";
+          }
+          return;
+        } else {
+          if (ct.includes('application/json')) {
+            const data = await res.json();
+            showMsg(data.message || 'Error al iniciar sesión', 'danger');
+          } else {
+            const text = await res.text();
+            showMsg(text.replace(/<[^>]+>/g,'') || 'Error al iniciar sesión', 'danger');
+          }
+        }
+      } catch (err) {
+        showMsg('Error de red', 'danger');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText || 'Iniciar sesión'; }
+      }
+    });
+  })();
+</script>
+{% endblock %}
+

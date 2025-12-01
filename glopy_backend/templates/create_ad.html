@@ -1,0 +1,1755 @@
+{% extends "base2.html" %}
+
+{% block head_content %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inmobiliaria_redesign.css') }}">
+  <style>
+    /* Modern Create Ad Page Styles - Glopy Theme */
+    body { 
+      background-color: #f8f9fa; 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    body > .navbar, body > footer { display: none; }
+    body > main { 
+      padding: 0; 
+      padding-bottom: 80px; 
+      background-color: #f8f9fa; 
+      min-height: 100vh;
+    }
+    
+    /* Modern Header - Match inmobiliaria style */
+    .create-ad-header {
+      background: linear-gradient(135deg, #0071c2, #00a5e5);
+      color: white;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      transition: all 0.2s;
+      padding: 0;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .header-title {
+      text-align: center;
+      flex: 1;
+    }
+    
+    .header-title h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      margin-bottom: 0.25rem;
+    }
+    
+    .header-title p {
+      opacity: 0.9;
+      margin: 0;
+      font-size: 0.85rem;
+    }
+    
+    /* Progress Steps - Highly Visible on Blue Background */
+    .progress-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0;
+      flex-wrap: wrap;
+      padding: 0 1rem;
+    }
+    
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: white;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .step.active {
+      color: white;
+      font-weight: 700;
+    }
+    
+    .step.active span {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .step.completed {
+      color: #ffeb3b;
+    }
+    
+    .step.completed span {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.3);
+      border: 3px solid rgba(255, 255, 255, 0.6);
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .step.active .step-number {
+      background: white;
+      border: 3px solid white;
+      color: #0071c2;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      transform: scale(1.1);
+    }
+    
+    .step.completed .step-number {
+      background: #4CAF50;
+      border: 3px solid #4CAF50;
+      color: white;
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.5);
+    }
+    
+    .step-connector {
+      width: 40px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+      border-radius: 2px;
+      margin: 0 0.4rem;
+    }
+    
+    .step.completed + .step-connector {
+      background: #4CAF50;
+      height: 4px;
+    }
+    
+    /* Make connector more visible when the next step is active */
+    .step.active + .step-connector {
+      background: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Content Container */
+    .content-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0.75rem;
+    }
+    
+    .content-sheet {
+      background: white;
+      border-radius: 16px 16px 0 0;
+      padding: 1.25rem;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+      margin-top: -15px;
+      position: relative;
+      z-index: 1;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .content-sheet form {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .form-step.active {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    /* Form Sections */
+    .form-step {
+      display: none;
+      animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .form-step.active {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+    
+    .form-section {
+      margin-bottom: 1rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    
+    .form-text {
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+      color: #6c757d;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0071c2, #00a5e5);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .section-title {
+      flex: 1;
+    }
+    
+    .section-title h3 {
+      margin: 0;
+      color: #333;
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    
+    .section-title p {
+      margin: 0;
+      color: #666;
+      font-size: 0.8rem;
+      line-height: 1.3;
+    }
+    
+    /* Enhanced Form Controls */
+    .form-floating {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    
+    .form-floating .form-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+      height: auto;
+    }
+    
+    .form-floating .form-control:focus {
+      border-color: #0071c2;
+      box-shadow: 0 0 0 0.2rem rgba(0, 113, 194, 0.15);
+      background: white;
+    }
+    
+    .form-floating label {
+      padding: 0.75rem 0.9rem;
+      color: #666;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1rem;
+    }
+    
+    .input-group .form-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+    
+    .input-group .form-control:focus {
+      border-color: #0071c2;
+      box-shadow: 0 0 0 0.2rem rgba(0, 113, 194, 0.15);
+      background: white;
+    }
+    
+    .input-group-text {
+      background: #0071c2;
+      color: white;
+      border: 2px solid #0071c2;
+      border-radius: 12px 0 0 12px;
+      font-weight: 600;
+    }
+    
+    /* Photo Upload Area */
+    .photo-upload-area {
+      border: 3px dashed #0071c2;
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, #f0f8ff, #e8f4ff);
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .photo-upload-area::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 40%, rgba(0, 113, 194, 0.05) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+    
+    .photo-upload-area:hover::before {
+      transform: translateX(100%);
+    }
+    
+    .photo-upload-area:hover {
+      border-color: #00a5e5;
+      background: linear-gradient(135deg, #e8f4ff, #f0f8ff);
+      transform: scale(1.02);
+    }
+    
+    .upload-icon {
+      font-size: 2.5rem;
+      color: #0071c2;
+      margin-bottom: 0.75rem;
+    }
+    
+    .upload-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.4rem;
+    }
+    
+    .upload-subtext {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-btn {
+      background: linear-gradient(135deg, #0071c2, #00a5e5);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-btn:hover {
+      background: linear-gradient(135deg, #00a5e5, #0071c2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 113, 194, 0.3);
+    }
+    
+    /* Photo Preview */
+    .photo-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .photo-preview-item {
+      position: relative;
+      width: 100%;
+      height: 140px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid #e9ecef;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .photo-preview-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .photo-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .remove-photo {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    }
+    
+    .remove-photo:hover {
+      background: #ff3742;
+      transform: scale(1.1);
+    }
+    
+    .photo-count {
+      text-align: center;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    
+    .photo-count.minimum {
+      background: #ffe6e6;
+      color: #dc3545;
+    }
+    
+    .photo-count.sufficient {
+      background: #e6f7e6;
+      color: #28a745;
+    }
+    
+    /* Feature Checkboxes */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    
+    .feature-item {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .feature-item:hover {
+      border-color: #0071c2;
+      background: #f0f8ff;
+    }
+    
+    .feature-item.checked {
+      border-color: #0071c2;
+      background: linear-gradient(135deg, #f0f8ff, #e8f4ff);
+    }
+    
+    .feature-item .form-check {
+      margin: 0;
+    }
+    
+    .feature-item .form-check-input {
+      margin-right: 0.75rem;
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+    
+    .feature-item .form-check-label {
+      font-weight: 500;
+      color: #333;
+      cursor: pointer;
+    }
+    
+    /* Navigation Buttons */
+    .form-navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 2px solid #f0f0f0;
+      background: white;
+      flex-shrink: 0;
+    }
+    
+    .btn-nav {
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.3s ease;
+      min-width: 110px;
+      font-size: 0.9rem;
+    }
+    
+    .btn-prev {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-prev:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .btn-next, .btn-submit {
+      background: linear-gradient(135deg, #0071c2, #00a5e5);
+      color: white;
+    }
+    
+    .btn-next:hover, .btn-submit:hover {
+      background: linear-gradient(135deg, #00a5e5, #0071c2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 113, 194, 0.3);
+    }
+    
+    .btn-submit:disabled {
+      background: #6c757d;
+      transform: none;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .content-container {
+        padding: 0 0.5rem;
+      }
+      
+      .content-sheet {
+        padding: 1.5rem;
+        border-radius: 16px;
+      }
+      
+      .create-ad-header {
+        padding: 1rem 0.75rem;
+      }
+      
+      .progress-steps {
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0 0.5rem;
+      }
+      
+      .step {
+        font-size: 0.85rem;
+      }
+      
+      .step-number {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+      }
+      
+      .step-connector {
+        width: 25px;
+        margin: 0 0.25rem;
+      }
+      
+      .step span {
+        font-size: 0.8rem;
+      }
+      
+      .header-title h1 {
+        font-size: 1.4rem;
+      }
+      
+      .header-title p {
+        font-size: 0.85rem;
+      }
+      
+      .photo-preview {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+      
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-navigation {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .btn-nav {
+        width: 100%;
+      }
+    }
+    
+    .required-field {
+      color: #dc3545;
+    }
+    
+    /* Hide ad limit info by default - only show if limit reached */
+    #adLimitInfo {
+      display: none;
+    }
+    
+    .form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    /* Characteristics Step Styling - Improved UI */
+    .characteristics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .characteristic-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 1rem;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .characteristic-card:hover {
+      border-color: #0071c2;
+      background: #f0f8ff;
+      box-shadow: 0 4px 12px rgba(0, 113, 194, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .characteristic-card:focus-within {
+      border-color: #0071c2;
+      background: white;
+      box-shadow: 0 4px 16px rgba(0, 113, 194, 0.15);
+    }
+    
+    .characteristic-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.85rem;
+    }
+    
+    .characteristic-label i {
+      color: #0071c2;
+      font-size: 0.95rem;
+    }
+    
+    .characteristic-input-wrapper {
+      position: relative;
+    }
+    
+    .form-step[data-step="2"] .input-group {
+      margin-bottom: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+    
+    .form-step[data-step="2"] .input-group-text {
+      background: white;
+      color: #0071c2;
+      border: none;
+      border-right: 2px solid #e9ecef;
+      font-weight: 600;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-step[data-step="2"] .input-group:focus-within {
+      border-color: #0071c2;
+      box-shadow: 0 0 0 0.2rem rgba(0, 113, 194, 0.15);
+    }
+    
+    .form-step[data-step="2"] .input-group:focus-within .input-group-text {
+      border-right-color: #0071c2;
+      background: #f0f8ff;
+      color: #0071c2;
+    }
+    
+    .form-step[data-step="2"] .form-control,
+    .form-step[data-step="2"] .form-select {
+      border: none;
+      border-radius: 0;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      background: white;
+      font-weight: 500;
+    }
+    
+    .form-step[data-step="2"] .form-control:focus,
+    .form-step[data-step="2"] .form-select:focus {
+      border: none;
+      box-shadow: none;
+      background: white;
+      outline: none;
+    }
+    
+    .form-step[data-step="2"] .input-group:focus-within .form-control,
+    .form-step[data-step="2"] .input-group:focus-within .form-select {
+      background: white;
+    }
+    
+    .form-step[data-step="2"] .input-group:hover:not(:focus-within) {
+      border-color: #ced4da;
+    }
+    
+    .form-step[data-step="2"] .form-select {
+      cursor: pointer;
+    }
+    
+    .form-step[data-step="2"] .form-label {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .characteristics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .characteristic-card {
+        padding: 1rem;
+      }
+      
+      .characteristic-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.6rem;
+      }
+    }
+    
+    @media (min-width: 769px) and (max-width: 992px) {
+      .characteristics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .photo-count {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 0.75rem;
+      margin-bottom: 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+    
+    .photo-count.minimum {
+      color: #dc3545;
+      font-weight: 600;
+    }
+    
+    .form-check-input:checked {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    
+    .form-check-input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    /* WhatsApp Pop-up Styles */
+    .whatsapp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      animation: popupSlideIn 0.3s ease-out;
+    }
+    
+    .whatsapp-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .whatsapp-popup .popup-icon {
+      font-size: 3rem;
+      color: #25D366;
+      margin-bottom: 1rem;
+    }
+    
+    .whatsapp-popup h4 {
+      color: #25D366;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    .whatsapp-popup p {
+      color: #666;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    
+    .whatsapp-popup .btn-close-popup {
+      background: #25D366;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .whatsapp-popup .btn-close-popup:hover {
+      background: #128C7E;
+      transform: translateY(-1px);
+    }
+    
+    .whatsapp-benefit-badge {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes popupSlideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .create-ad-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .create-ad-header p {
+        font-size: 0.9rem;
+      }
+      
+      .form-section {
+        padding: 1rem;
+      }
+      
+      .photo-upload-area {
+        padding: 1.5rem;
+      }
+      
+      .photo-preview-item {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .btn-create-ad {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<!-- Modern Header -->
+<div class="create-ad-header">
+  <div class="header-content">
+    <button class="back-btn" onclick="goBack()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <div class="header-title">
+      <h1>Crear Anuncio</h1>
+      <p>Publica tu propiedad y encuentra el comprador perfecto</p>
+    </div>
+    <div style="width: 48px;"></div> <!-- Spacer for alignment -->
+  </div>
+  
+  <!-- Progress Steps -->
+  <div class="progress-steps">
+    <div class="step active" data-step="1">
+      <div class="step-number">1</div>
+      <span>Información</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" data-step="2">
+      <div class="step-number">2</div>
+      <span>Características</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" data-step="3">
+      <div class="step-number">3</div>
+      <span>Fotos</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" data-step="4">
+      <div class="step-number">4</div>
+      <span>Contacto</span>
+    </div>
+  </div>
+</div>
+
+<!-- Content Container -->
+<div class="content-container">
+  <div class="content-sheet">
+
+  <form id="createAdForm" enctype="multipart/form-data">
+    
+    <!-- Ad Limit Information -->
+    <div id="adLimitInfo" class="mb-4">
+      <!-- This will be populated by JavaScript -->
+    </div>
+    
+    <!-- Step 1: Basic Information -->
+    <div class="form-step active" data-step="1">
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-house-door"></i>
+          </div>
+          <div class="section-title">
+            <h3>Información Básica</h3>
+            <p>Datos principales de tu propiedad</p>
+          </div>
+        </div>
+        
+        <div class="form-floating">
+          <input type="text" class="form-control" id="title" name="title" required 
+                 placeholder="Ej: Piso moderno en el centro de Valencia">
+          <label for="title">Título del anuncio <span class="required-field">*</span></label>
+        </div>
+        
+        <div class="input-group">
+          <span class="input-group-text">€</span>
+          <input type="number" class="form-control" id="price" name="price" required 
+                 placeholder="250000" min="0">
+        </div>
+        
+        <div class="form-floating">
+          <input type="text" class="form-control" id="location" name="location" required 
+                 placeholder="Ej: Sagrada Família, Barcelona">
+          <label for="location">Ubicación <span class="required-field">*</span></label>
+          <div class="form-text">
+            <i class="bi bi-geo-alt"></i>
+            Introduce la dirección, barrio o zona de tu propiedad
+          </div>
+        </div>
+        
+        <div class="form-floating">
+          <textarea class="form-control" id="description" name="description" rows="3" required
+                    placeholder="Describe tu propiedad..." style="height: 90px;"></textarea>
+          <label for="description">Descripción <span class="required-field">*</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Characteristics -->
+    <div class="form-step" data-step="2">
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-sliders"></i>
+          </div>
+          <div class="section-title">
+            <h3>Características</h3>
+            <p>Detalles técnicos de tu propiedad</p>
+          </div>
+        </div>
+        
+        <div class="characteristics-grid">
+          <div class="characteristic-card">
+            <label class="characteristic-label" for="rooms">
+              <i class="bi bi-door-open"></i>
+              Habitaciones
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-door-open"></i></span>
+              <input type="number" class="form-control" id="rooms" name="rooms" min="0" placeholder="Ej: 3">
+            </div>
+          </div>
+          
+          <div class="characteristic-card">
+            <label class="characteristic-label" for="bathrooms">
+              <i class="bi bi-droplet"></i>
+              Baños
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-droplet"></i></span>
+              <input type="number" class="form-control" id="bathrooms" name="bathrooms" min="0" placeholder="Ej: 2">
+            </div>
+          </div>
+          
+          <div class="characteristic-card">
+            <label class="characteristic-label" for="square_meters">
+              <i class="bi bi-rulers"></i>
+              Superficie (m²)
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">m²</span>
+              <input type="number" class="form-control" id="square_meters" name="square_meters" min="0" placeholder="Ej: 85">
+            </div>
+          </div>
+          
+          <div class="characteristic-card">
+            <label class="characteristic-label" for="property_type">
+              <i class="bi bi-house"></i>
+              Tipo de propiedad
+            </label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-house"></i></span>
+              <select class="form-select" id="property_type" name="property_type">
+                <option value="">Seleccionar...</option>
+                <option value="piso">Piso</option>
+                <option value="casa">Casa</option>
+                <option value="atico">Ático</option>
+                <option value="duplex">Dúplex</option>
+                <option value="estudio">Estudio</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section-title mt-3 mb-2">
+          <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">Características adicionales</h4>
+          <p style="font-size: 0.8rem; margin: 0;">Selecciona las características que tiene tu propiedad</p>
+        </div>
+        
+        <div class="feature-grid">
+          <div class="feature-item" onclick="toggleFeature('has_parking')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_parking" name="has_parking">
+              <label class="form-check-label" for="has_parking">
+                <i class="bi bi-car-front-fill me-2"></i>Parking
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('has_elevator')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_elevator" name="has_elevator">
+              <label class="form-check-label" for="has_elevator">
+                <i class="bi bi-arrow-up-square me-2"></i>Ascensor
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('has_terrace')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_terrace" name="has_terrace">
+              <label class="form-check-label" for="has_terrace">
+                <i class="bi bi-sun me-2"></i>Terraza
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('has_garden')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_garden" name="has_garden">
+              <label class="form-check-label" for="has_garden">
+                <i class="bi bi-tree me-2"></i>Jardín
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('has_pool')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_pool" name="has_pool">
+              <label class="form-check-label" for="has_pool">
+                <i class="bi bi-water me-2"></i>Piscina
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('has_storage_room')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="has_storage_room" name="has_storage_room">
+              <label class="form-check-label" for="has_storage_room">
+                <i class="bi bi-box me-2"></i>Trastero
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('is_exterior')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_exterior" name="is_exterior">
+              <label class="form-check-label" for="is_exterior">
+                <i class="bi bi-brightness-high me-2"></i>Exterior
+              </label>
+            </div>
+          </div>
+          <div class="feature-item" onclick="toggleFeature('is_accessible')">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_accessible" name="is_accessible">
+              <label class="form-check-label" for="is_accessible">
+                <i class="bi bi-universal-access me-2"></i>Accesible
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Photos -->
+    <div class="form-step" data-step="3">
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-camera-fill"></i>
+          </div>
+          <div class="section-title">
+            <h3>Fotos de tu Propiedad</h3>
+            <p>Sube al menos 3 fotos atractivas (mínimo requerido)</p>
+          </div>
+        </div>
+        
+        <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
+          <div class="upload-icon">
+            <i class="bi bi-cloud-upload"></i>
+          </div>
+          <div class="upload-text">Arrastra y suelta las fotos aquí</div>
+          <div class="upload-subtext">o haz clic para seleccionar archivos</div>
+          <input type="file" id="photoInput" name="photos" multiple accept="image/*" style="display: none;">
+          <button type="button" class="upload-btn">
+            <i class="bi bi-plus-circle me-2"></i>Seleccionar Fotos
+          </button>
+        </div>
+        
+        <div class="photo-preview" id="photoPreview"></div>
+        <div class="photo-count" id="photoCount">0 fotos seleccionadas - Mínimo 3 requeridas</div>
+      </div>
+    </div>
+
+    <!-- Step 4: Contact -->
+    <div class="form-step" data-step="4">
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="bi bi-whatsapp"></i>
+          </div>
+          <div class="section-title">
+            <h3>Información de Contacto</h3>
+            <p>Para que los interesados puedan contactarte fácilmente</p>
+          </div>
+        </div>
+        
+        <div class="alert alert-success" role="alert">
+          <i class="bi bi-graph-up-arrow me-2"></i>
+          <strong>¡Tip profesional!</strong> Los anuncios con WhatsApp tienen 40% más probabilidades de venta.
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-whatsapp"></i>
+              </span>
+              <input type="tel" class="form-control" id="whatsapp_number" name="whatsapp_number" 
+                     placeholder="+34 123 456 789">
+            </div>
+            <label class="form-label mt-1">Número de WhatsApp</label>
+            <div class="form-text">Incluye el código de país (ej: +34 para España)</div>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-person"></i>
+              </span>
+              <input type="text" class="form-control" id="contact_name" name="contact_name" 
+                     placeholder="Tu nombre" value="{{ current_user.name or '' }}">
+            </div>
+            <label class="form-label mt-1">Nombre de contacto</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Navigation -->
+    <div class="form-navigation">
+      <button type="button" class="btn-nav btn-prev" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+        <i class="bi bi-chevron-left me-2"></i>Anterior
+      </button>
+      <div class="flex-grow-1"></div>
+      <button type="button" class="btn-nav btn-next" id="nextBtn" onclick="changeStep(1)">
+        Siguiente<i class="bi bi-chevron-right ms-2"></i>
+      </button>
+      <button type="submit" class="btn-nav btn-submit" id="submitBtn" style="display: none;">
+        <i class="bi bi-check-circle me-2"></i>Crear Anuncio
+      </button>
+    </div>
+  </form>
+  </div>
+</div>
+
+<!-- WhatsApp Benefit Pop-up -->
+<div id="whatsappPopup" class="whatsapp-popup" style="display: none;">
+  <div class="popup-icon">
+    <i class="bi bi-whatsapp"></i>
+  </div>
+  <h4>¡Consejo para Vender Más!</h4>
+  <p>Los anuncios con número de WhatsApp tienen un <strong>40% más de probabilidades de venta</strong> que los que no lo incluyen.</p>
+  <p>Los compradores prefieren contactar directamente por WhatsApp para hacer preguntas rápidas y agendar visitas.</p>
+  <button class="btn-close-popup" onclick="closeWhatsAppPopup()">
+    <i class="bi bi-check-circle"></i> Entendido
+  </button>
+</div>
+
+<div id="whatsappPopupOverlay" class="whatsapp-popup-overlay" style="display: none;"></div>
+
+<!-- Bottom Navigation (same as other pages) -->
+{% include 'bottom_nav.html' %}
+
+<script>
+// Global Variables
+let currentStep = 1;
+let selectedPhotos = [];
+const totalSteps = 4;
+
+// Step Navigation Functions
+function changeStep(direction) {
+    console.log(`Changing step from ${currentStep} to ${currentStep + direction}`);
+    const newStep = currentStep + direction;
+    
+    if (newStep < 1 || newStep > totalSteps) {
+        console.log(`Step ${newStep} is out of range (1-${totalSteps})`);
+        return;
+    }
+    
+    // Validate current step before proceeding
+    if (direction > 0 && !validateStep(currentStep)) {
+        console.log(`Validation failed for step ${currentStep}`);
+        return;
+    }
+    
+    // Hide current form step
+    const currentFormStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+    console.log(`Current form step (${currentStep}):`, currentFormStep);
+    if (currentFormStep) {
+        currentFormStep.classList.remove('active');
+        currentFormStep.style.display = 'none';
+    }
+    
+    // Hide current progress step
+    const currentProgressStep = document.querySelector(`.step[data-step="${currentStep}"]`);
+    console.log(`Current progress step (${currentStep}):`, currentProgressStep);
+    if (currentProgressStep) {
+        currentProgressStep.classList.remove('active');
+    }
+    
+    // Update current step
+    currentStep = newStep;
+    console.log(`New current step: ${currentStep}`);
+    
+    // Show new form step
+    const newFormStep = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+    console.log(`New form step (${currentStep}):`, newFormStep);
+    if (newFormStep) {
+        newFormStep.classList.add('active');
+        newFormStep.style.display = 'block';
+    }
+    
+    // Show new progress step
+    const newProgressStep = document.querySelector(`.step[data-step="${currentStep}"]`);
+    console.log(`New progress step (${currentStep}):`, newProgressStep);
+    if (newProgressStep) {
+        newProgressStep.classList.add('active');
+    }
+    
+    // Mark previous steps as completed
+    for (let i = 1; i < currentStep; i++) {
+        const progressStep = document.querySelector(`.step[data-step="${i}"]`);
+        if (progressStep) {
+            progressStep.classList.add('completed');
+        }
+    }
+    
+    // Update navigation buttons
+    updateNavigationButtons();
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+    switch(step) {
+        case 1:
+            const title = document.getElementById('title').value;
+            const price = document.getElementById('price').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            
+            if (!title.trim()) {
+                showValidationError('Por favor, introduce un título para tu anuncio');
+                return false;
+            }
+            if (!price || price <= 0) {
+                showValidationError('Por favor, introduce un precio válido');
+                return false;
+            }
+            if (!location.trim()) {
+                showValidationError('Por favor, introduce la ubicación de tu propiedad');
+                return false;
+            }
+            if (!description.trim()) {
+                showValidationError('Por favor, añade una descripción de tu propiedad');
+                return false;
+            }
+            return true;
+            
+        case 2:
+            // Characteristics step - optional but we could add validation
+            return true;
+            
+        case 3:
+            if (selectedPhotos.length < 3) {
+                showValidationError('Por favor, sube al menos 3 fotos de tu propiedad');
+                return false;
+            }
+            return true;
+            
+        case 4:
+            // Contact step - optional
+            return true;
+            
+        default:
+            return true;
+    }
+}
+
+function showValidationError(message) {
+    // Create and show error notification
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-danger position-fixed';
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Show/hide previous button
+    prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+    
+    // Show/hide next/submit buttons
+    if (currentStep === totalSteps) {
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'block';
+    } else {
+        nextBtn.style.display = 'block';
+        submitBtn.style.display = 'none';
+    }
+}
+
+function goBack() {
+    if (currentStep > 1) {
+        changeStep(-1);
+    } else {
+        window.location.href = '/inmobiliaria';
+    }
+}
+
+// Feature Toggle Function
+function toggleFeature(featureId) {
+    const checkbox = document.getElementById(featureId);
+    const featureItem = checkbox.closest('.feature-item');
+    
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        featureItem.classList.add('checked');
+    } else {
+        featureItem.classList.remove('checked');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoCount = document.getElementById('photoCount');
+    const form = document.getElementById('createAdForm');
+    
+    // Initialize form steps
+    initializeFormSteps();
+    
+    // Initialize navigation buttons
+    updateNavigationButtons();
+    
+    function initializeFormSteps() {
+        console.log('Initializing form steps...');
+        
+        // Hide all form steps except the first one
+        const allFormSteps = document.querySelectorAll('.form-step');
+        console.log('Found form steps:', allFormSteps.length);
+        
+        allFormSteps.forEach((step, index) => {
+            const stepNumber = parseInt(step.getAttribute('data-step'));
+            console.log(`Form step ${stepNumber}:`, step);
+            
+            if (stepNumber === 1) {
+                step.classList.add('active');
+                step.style.display = 'block';
+            } else {
+                step.classList.remove('active');
+                step.style.display = 'none';
+            }
+        });
+        
+        // Set up progress steps
+        const allProgressSteps = document.querySelectorAll('.step');
+        console.log('Found progress steps:', allProgressSteps.length);
+        
+        allProgressSteps.forEach((step, index) => {
+            const stepNumber = parseInt(step.getAttribute('data-step'));
+            console.log(`Progress step ${stepNumber}:`, step);
+            
+            if (stepNumber === 1) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
+            step.classList.remove('completed');
+        });
+    }
+    
+    // Photo upload handling
+    photoInput.addEventListener('change', function(e) {
+        handlePhotos(e.target.files);
+    });
+    
+    // Drag and drop functionality
+    const uploadArea = document.getElementById('photoUploadArea');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight(e) {
+        uploadArea.style.borderColor = '#00a5e5';
+        uploadArea.style.transform = 'scale(1.02)';
+    }
+    
+    function unhighlight(e) {
+        uploadArea.style.borderColor = '#0071c2';
+        uploadArea.style.transform = 'scale(1)';
+    }
+    
+    uploadArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handlePhotos(files);
+    }
+    
+    function handlePhotos(files) {
+        Array.from(files).forEach(file => {
+            if (file.type.startsWith('image/') && selectedPhotos.length < 10) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedPhotos.push({
+                        file: file,
+                        preview: e.target.result
+                    });
+                    updatePhotoPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    function updatePhotoPreview() {
+        photoPreview.innerHTML = '';
+        selectedPhotos.forEach((photo, index) => {
+            const div = document.createElement('div');
+            div.className = 'photo-preview-item';
+            div.innerHTML = `
+                <img src="${photo.preview}" alt="Preview ${index + 1}">
+                <button type="button" class="remove-photo" onclick="removePhoto(${index})">
+                    <i class="bi bi-x"></i>
+                </button>
+            `;
+            photoPreview.appendChild(div);
+        });
+        
+        const count = selectedPhotos.length;
+        if (count === 0) {
+            photoCount.textContent = '0 fotos seleccionadas - Mínimo 3 requeridas';
+            photoCount.className = 'photo-count minimum';
+        } else if (count < 3) {
+            photoCount.textContent = `${count} fotos seleccionadas - Faltan ${3 - count} más`;
+            photoCount.className = 'photo-count minimum';
+        } else {
+            photoCount.textContent = `${count} fotos seleccionadas - ¡Perfecto!`;
+            photoCount.className = 'photo-count sufficient';
+        }
+    }
+    
+    window.removePhoto = function(index) {
+        selectedPhotos.splice(index, 1);
+        updatePhotoPreview();
+    };
+    
+    // Form submission is now handled by the ad limit checking system
+    
+    // Initialize photo count display
+    updatePhotoPreview();
+});
+
+function showSuccessMessage(title, message) {
+    const notification = document.createElement('div');
+    notification.className = 'alert alert-success position-fixed';
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px;';
+    notification.innerHTML = `
+        <i class="bi bi-check-circle me-2"></i>
+        <strong>${title}</strong><br>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+}
+
+function showNotification(title, message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px;';
+    notification.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+        <strong>${title}</strong><br>
+        ${message}
+    `;
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Ad limit checking and payment functionality
+let adLimitData = null;
+
+// Check ad limits on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkAdLimits();
+});
+
+async function checkAdLimits() {
+    try {
+        const response = await fetch('/api/check-ad-limit');
+        const data = await response.json();
+        
+        if (data.success !== false) {
+            adLimitData = data;
+            updateAdLimitDisplay();
+        }
+    } catch (error) {
+        console.error('Error checking ad limits:', error);
+    }
+}
+
+function updateAdLimitDisplay() {
+    if (!adLimitData) return;
+    
+    const limitInfo = document.getElementById('adLimitInfo');
+    if (!limitInfo) return;
+    
+    // Hide the free ads notice - user requested removal
+    // Only show warning if limit is reached
+    if (adLimitData.can_post_free) {
+        // Hide the notice - don't display anything
+        limitInfo.innerHTML = '';
+        limitInfo.style.display = 'none';
+    } else if (adLimitData.is_premium) {
+        // Premium users - hide notice
+        limitInfo.innerHTML = '';
+        limitInfo.style.display = 'none';
+    } else {
+        // Only show warning if limit reached (no free ads left)
+        limitInfo.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                Has alcanzado el límite de anuncios gratuitos. 
+                <button class="btn btn-sm btn-primary ms-2" id="payButton" onclick="openPaymentModal(${adLimitData.premium_price})">
+                    <i class="bi bi-credit-card"></i> Pagar €${adLimitData.premium_price.toFixed(2)}
+                </button>
+            </div>
+        `;
+        limitInfo.style.display = 'block';
+    }
+}
+
+// Override the form submission to check limits
+document.getElementById('createAdForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if (!adLimitData) {
+        await checkAdLimits();
+    }
+    
+    if (!adLimitData.can_post_free && !adLimitData.is_premium) {
+        showNotification('Límite de anuncios', 'Has alcanzado el límite de anuncios gratuitos. Necesitas pagar para publicar más anuncios.', 'warning');
+        return;
+    }
+    
+    // Proceed with normal form submission
+    submitForm();
+});
+
+function submitForm() {
+    const form = document.getElementById('createAdForm');
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Creando tu anuncio...';
+    submitBtn.disabled = true;
+    
+    fetch('/api/create-ad', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccessMessage('¡Anuncio creado exitosamente!', 'Tu propiedad ya está publicada y visible para los compradores.');
+            setTimeout(() => {
+                window.location.href = `/anuncio/${data.announcement_id}`;
+            }, 2000);
+        } else if (data.requires_payment) {
+            showNotification('Pago requerido', data.message, 'warning');
+            openPaymentModal(data.price);
+        } else {
+            showValidationError(data.message || 'No se pudo crear el anuncio');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showValidationError('Error de conexión. Por favor, inténtalo de nuevo.');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Crear Anuncio';
+        submitBtn.disabled = false;
+    });
+}
+</script>
+
+<!-- Include Payment Modal -->
+{% include 'payment_modal.html' %}
+
+{% endblock %}
